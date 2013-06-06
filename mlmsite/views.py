@@ -3,6 +3,7 @@
 from userena import views as userena_views
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.core.management import call_command
 
 
 def index(request):
@@ -46,6 +47,12 @@ def graph_eval_more_users(request):
     for i in range(6):
         user = c.createNewUser(sponsor=master)
         c.createNewPosition(user)
+    return HttpResponseRedirect('/graph_eval/')
+
+
+def graph_eval_gyalu(request):
+    call_command('flush', interactive=False, verbosity=1)
+    call_command('syncdb', interactive=False, verbosity=1)
     return HttpResponseRedirect('/graph_eval/')
 
 
