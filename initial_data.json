@@ -1,0 +1,79 @@
+[
+    { "pk": 1, "model": "sites.site", "fields": { "name": "localhost:8000", "domain":"localhost:8000" } },
+
+    {
+        "pk": 1,
+        "model": "auth.user",
+        "fields": {
+            "username": "molnarzs",
+            "first_name": "",
+            "last_name": "",
+            "is_active": true,
+            "is_superuser": true,
+            "is_staff": true,
+            "last_login": "2013-04-25T10:30:02.656Z",
+            "groups": [],
+            "user_permissions": [],
+            "password": "pbkdf2_sha256$10000$ftUBAuqukDJD$lpqB+G+Tgrd8ArOKpF+LxFNach4wSKdWEgmzCBmBFpw=",
+            "email": "zsolt@zsoltmolnar.hu",
+            "date_joined": "2013-04-25T10:30:02.656Z"
+        }
+    },
+
+    {
+        "pk": 2,
+        "model": "auth.user",
+        "fields": {
+            "username": "user1",
+            "first_name": "Atyala",
+            "last_name": "Patyala",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-04-25T10:38:51.449Z",
+            "groups": [],
+            "user_permissions": [],
+            "password": "pbkdf2_sha256$10000$KGZWDKgptGAa$96vNeDppXmuthak9ERHEEgn30r0XczLJ06c1vstPQrg=",
+            "email": "a@b.com",
+            "date_joined": "2013-04-25T10:38:38.953Z"
+        }
+    },
+
+    {
+        "pk": 1,
+        "model": "accounts.postaladdress",
+        "fields": {
+            "city": "A",
+            "country": "HU",
+            "state": "",
+            "address": "A",
+            "zip_code": "1"
+        }
+    },
+
+    {
+        "pk": 2,
+        "model": "accounts.postaladdress",
+        "fields": {
+            "city": "A",
+            "country": "HU",
+            "state": "",
+            "address": "A",
+            "zip_code": "1"
+        }
+    },
+
+    {
+        "pk": 1,
+        "model": "accounts.userprofile",
+        "fields": {
+            "delivery_address": 2,
+            "language": "en",
+            "postal_address": 1,
+            "privacy": "registered",
+            "user": 2,
+            "mugshot": "",
+            "birth_date": "1986-06-05"
+        }
+    }
+]

@@ -1,0 +1,32 @@
+{#{% extends "base.html" %}#}
+{% load i18n %}
+
+{% block title %}
+    {{ site_name }}: {% trans "Postal Addresses Test" %} 
+{% endblock %}
+
+{% block content %}
+    <form class="form" action="" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            {{ field.errors }}
+            {% comment %} Displaying checkboxes differently {% endcomment %}
+            {% if field.name == 'tos' %}
+                <p class="checkbox">
+                <label for="id_{{ field.name }}">{{ field }} {{ field.label }}</label>
+                </p>
+            {% else %}
+                <p>
+                {{ field.label_tag }} 
+                {{ field }}
+                </p>
+            {% endif %}
+        {% endfor %}
+        <hr />
+        {% include "postal_address_form.html" with name="Postal" form=postal_form %}
+        <hr />
+        {% include "postal_address_form.html" with name="Delivery" form=delivery_form  %}  
+        <button type="submit" class="btn btn-success" name="submit">{% trans "Submit" %}</button>
+    </form>
+{% endblock %}
