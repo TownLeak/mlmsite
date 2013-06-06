@@ -5,7 +5,7 @@ from os.path import join
 from django.utils.translation import ugettext as _
 # Django settings for DiamondMLM project.
 
-APP_ROOT = '/Users/molnarzs/Dropbox/Projects/MLM/site/DiamondMLM/'
+APP_ROOT = '/home/mlm/public_html/mlmsite.com/'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -19,34 +19,14 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'database',                      # Or path to database file if using sqlite3.
+        #'NAME': 'database',                      # Or path to database file if using sqlite3.
+        'NAME': '/home/mlm/public_html/mlmsite.com/database',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
-
-NEO4J_DATABASES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 7474,
-        'ENDPOINT': '/db/data'
-    }
-}
-
-NEO4J_TEST_DATABASES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 7474,
-        'ENDPOINT': '/db/data',
-        'OPTIONS': {
-            'CLEANDB_URI': '/cleandb/secret-key'
-        }
-    }
-}
-
-DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -126,7 +106,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # From Evernote TASK00003
     'userena.middleware.UserenaLocaleMiddleware'
 )
 
@@ -150,13 +129,9 @@ INSTALLED_APPS = (
     'mlmsite',
     'bootstrap_toolkit',
     'userena',
-    'guardian',
-    #'easy_thumbnails',
     'accounts',
-    'account',
     'django_countries',
     'south',
-    'lettuce.django',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -197,19 +172,14 @@ NEO4J_RESOURCE_URI = join(APP_ROOT, 'neo4jdb')
 
 # From Evernote TASK00001
 TEMPLATE_CONTEXT_PROCESSORS = (
-    "account.context_processors.account",
     'django.contrib.auth.context_processors.auth',
-    'account.context_processors.account',
-    # START Evernote TASK00004
     'django.core.context_processors.i18n',
-    # STOP Evernote TASK00004
 )
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    #'django.template.loaders.eggs.Loader',
 )
 
 
@@ -225,7 +195,6 @@ THEME_ACCOUNT_CONTACT_EMAIL = "zsolt@zsoltmolnar.hu"
 # From Evernote TASK00003
 AUTHENTICATION_BACKENDS = (
     'userena.backends.UserenaAuthenticationBackend',
-    'guardian.backends.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
