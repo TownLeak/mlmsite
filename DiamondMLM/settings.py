@@ -3,10 +3,10 @@
 #
 from os.path import join
 from django.utils.translation import ugettext as _
+from settings_actual import Settings
 # Django settings for DiamondMLM project.
 
-APP_ROOT = '/home/mlm/public_html/mlmsite.com/'
-#APP_ROOT = '/Users/molnarzs/Dropbox/Projects/MLM/site/mlmsite'
+APP_ROOT = Settings["root"]
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
