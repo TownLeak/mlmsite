@@ -5,8 +5,8 @@ from os.path import join
 from django.utils.translation import ugettext as _
 # Django settings for DiamondMLM project.
 
-#APP_ROOT = '/mlm/public_html/mlmsite.com/'
-APP_ROOT = '/Users/molnarzs/Dropbox/Projects/MLM/site/mlmsite'
+APP_ROOT = '/home/mlm/public_html/mlmsite.com/'
+#APP_ROOT = '/Users/molnarzs/Dropbox/Projects/MLM/site/mlmsite'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
