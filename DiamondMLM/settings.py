@@ -5,7 +5,8 @@ from os.path import join
 from django.utils.translation import ugettext as _
 # Django settings for DiamondMLM project.
 
-APP_ROOT = '/home/mlm/public_html/mlmsite.com/'
+#APP_ROOT = '/mlm/public_html/mlmsite.com/'
+APP_ROOT = '/Users/molnarzs/Dropbox/Projects/MLM/site/mlmsite'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -19,8 +20,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        #'NAME': 'database',                      # Or path to database file if using sqlite3.
-        'NAME': '/home/mlm/public_html/mlmsite.com/database',                      # Or path to database file if using sqlite3.
+        'NAME': APP_ROOT + 'database',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
