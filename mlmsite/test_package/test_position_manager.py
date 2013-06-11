@@ -66,6 +66,16 @@ class Tests(TestCase):
         self.assertEqual(newPosition.sponsor.sponsor.sponsor, rootPosition)
         self.assertFalse(isFull)
 
+    def createNewPositionForMaster(self):
+        user = User()
+        user.id = 1
+        rootPosition = Position()
+        newPosition, isFull = self.pm.createNewPositionForMaster(rootPosition, user)
+        self.assertTrue(newPosition)
+        self.assertEqual(rootPosition.left_guy, newPosition)
+        self.assertFalse(newPosition.sponsor)
+        self.assertFalse(isFull)
+
 
 # -----------------------------------------------------------------------------
 def TheTestSuite():

@@ -1,5 +1,5 @@
 #! /bin/bash
 
 rm database
-python manage.py syncdb
-pyhton manage.py runserver
+python manage.py syncdb --noinput
+python manage.py runserver

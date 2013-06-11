@@ -41,7 +41,7 @@ class Tests(TestCase):
         self.assertEqual("user1", newUser.username)
         self.assertEqual(sponsor, newUser.sponsor)
 
-    def testCreateNewPosition(self):
+    def testCreateNewPositionForUser(self):
         c = Controller()
         master = Controller.user_type.objects.get(id=1)
         user = Controller.user_type.objects.create(username="User", sponsor=master)
@@ -76,8 +76,8 @@ class Tests(TestCase):
         master = c.getMaster()
         self.assertEqual((numberOfUsers + 1) * c.price, master.money)
         # Check if the new position for the master has been created.
-        # It must be the rightmost node at one level below the full matrix.
-        self.assertEqual(master.active_position.sponsor.right_guy, None)
+        # It must be a completely new matrix.
+        self.assertEqual(master.active_position.sponsor, None)
 
     def testHandleFullMatrixOfUser(self):
         c = Controller()
@@ -141,6 +141,13 @@ class Tests(TestCase):
         master = c.getMaster()
         self.assertEqual(c.commission, user.money)
         self.assertEqual(-c.commission, master.money)
+
+    def testIsMaster(self):
+        c = Controller()
+        master = c.getMaster()
+        self.assertTrue(c.isMaster(master))
+        user = Controller.user_type.objects.create(username="Last User", sponsor=master)
+        self.assertFalse(c.isMaster(user))
 
 
 # -----------------------------------------------------------------------------

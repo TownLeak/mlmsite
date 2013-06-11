@@ -56,7 +56,11 @@ class Controller:
 
     def createNewPosition(self, user, paid=True):
         pm = PositionManager()
-        newPosition, isMatrixFull = pm.createNewPosition(user.sponsor.active_position, user)
+
+        if self.isMaster(user):
+            newPosition, isMatrixFull = pm.createNewPositionForMaster(user)
+        else:
+            newPosition, isMatrixFull = pm.createNewPosition(user.sponsor.active_position, user)
 
         user.active_position = newPosition
         user.save()
@@ -74,7 +78,7 @@ class Controller:
         logic = BinaryTreeLogic()
         top = logic.getMatrixTop(position)
         # Pay commission to it, except for the master.
-        if top.user.id != self.getMaster().id:
+        if not self.isMaster(top.user):
             self.payCommission(top.user)
         # Place the root again, to its sponsor's matrix.
         top.user.save()
@@ -94,6 +98,9 @@ class Controller:
 
     def getMaster(self):
         return User.objects.get(id=1)
+
+    def isMaster(self, user):
+        return user.id == 1
 
     def payFee(self, user):
         # User buys the product, money decrerases

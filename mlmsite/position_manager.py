@@ -7,11 +7,17 @@ from binary_tree_logic import BinaryTreeLogic
 class PositionManager:
     position_type = Position
 
-    def createNewPosition(self, rootPosition, user):
+    def _createNewPositionWithoutPlacement(self, user):
         positions = self.position_type.objects.all()
         new_index = len(positions)
         name = "position%d" % new_index
-        newPosition = self.position_type.objects.create(name=name, user=user)
+        return self.position_type.objects.create(name=name, user=user)
+
+    def createNewPositionForMaster(self, master):
+        return self._createNewPositionWithoutPlacement(master), False
+
+    def createNewPosition(self, rootPosition, user):
+        newPosition = self._createNewPositionWithoutPlacement(user)
         logic = BinaryTreeLogic()
         logic.placeNode(rootPosition, newPosition)
         owner = logic.getMatrixTop(newPosition)
