@@ -7,3 +7,4 @@ git pull
 pushd DiamondMLM
 ln -sf settings_prod.py settings_actual.py
 sudo /etc/init.d/apache2 reload
+popd
