@@ -1,0 +1,16 @@
+{
+	"folders":
+	[
+		{
+			"path": "/Users/molnarzs/Dropbox/Projects/MLM/site/mlmsite"
+		}
+	],
+    "build_systems":
+    [
+        {
+            "name": "Run Tests",
+            "working_dir": "${project_path}",
+            "cmd": ["python", "-Wall" , "manage.py", "test", "mlmsite"]
+        }
+    ]
+}
