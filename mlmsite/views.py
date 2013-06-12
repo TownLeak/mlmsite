@@ -13,6 +13,7 @@ def index(request):
 
 from forms import GraphEval_UserSelectionForm, GraphEval_SponsorSelectionForm
 from controller import Controller
+from binary_tree_logic import BinaryTreeLogic
 
 
 def graph_eval(request):
@@ -33,12 +34,14 @@ def graph_eval(request):
 
     c = Controller()
     nodes = c.getActualData()
+    logic = BinaryTreeLogic()
 
     return render(request, "graph_eval.html", {
         "actual_user": c.getActualUser(),
         "userSelectionForm": userSelectionForm,
         "sponsorSelectionForm": sponsorSelectionForm,
-        "nodes": nodes})
+        "nodes": nodes,
+        "json_data": logic.treeToJson(c.getActualUser().active_position)})
 
 
 def graph_eval_more_users(request):
@@ -54,6 +57,10 @@ def graph_eval_gyalu(request):
     call_command('flush', interactive=False, verbosity=1)
     call_command('syncdb', interactive=False, verbosity=1)
     return HttpResponseRedirect('/graph_eval/')
+
+
+def jit_eval(request):
+    return render(request, "jit_eval.html", {})
 
 
 def bootstrap(request):

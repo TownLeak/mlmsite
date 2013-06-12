@@ -22,4 +22,5 @@ urlpatterns += patterns('mlmsite.views',
     url(r'^graph_eval/gyalu/$', 'graph_eval_gyalu'),
     url(r'^graph_eval/leave/\d$', 'graph_eval_gyalu'),
     url(r'^bootstrap/$', 'bootstrap'),
+    url(r'^jit_eval/$', 'jit_eval'),
 )

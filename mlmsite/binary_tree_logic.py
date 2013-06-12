@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8
 from collections import deque
+import unicodedata
 
 
 class BinaryTreeLogic:
@@ -149,3 +150,24 @@ class BinaryTreeLogic:
             raise BinaryTreeLogic.NodeIsNotEmpty
         # Return the good node for placement
         return (actualNode, side)
+
+    def _treeToJsonRecursive(self, root):
+        children = []
+        if root.left_guy:
+            children.append(self.treeToJson(root.left_guy))
+        if root.right_guy:
+            children.append(self.treeToJson(root.right_guy))
+
+        name = (u'%s (%s)') % (root.user.username, root.user.sponsor.username if root.user.sponsor else "None")
+        name = unicodedata.normalize("NFKD", name).encode('ascii', 'ignore')
+     
+        return {
+            'id': ('%d' % root.id),
+            'name': name,
+            'data': {},
+            'children': children
+        }
+
+    def treeToJson(self, root):
+        return self._treeToJsonRecursive(root)
+        #return json.dumps(self._treeToJsonRecursive(root))

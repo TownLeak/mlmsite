@@ -6,14 +6,21 @@ from mlmsite.models import GraphEval_Position as Position
 from mlmsite.models import GraphEval_User as User
 
 
+class DummyUser:
+    def __init__(self, username, sponsor=None):
+        self.username = username
+        self.sponsor = sponsor
+
+
 class DummyNode:
-    def __init__(self, id, sponsor=None):
+    def __init__(self, id, sponsor=None, user=None):
         self.saved = False
         self.id = id
         self.right_guy = None
         self.left_guy = None
         self.sponsor = sponsor
         self.isCommissionPaid = False
+        self.user = user
 
     def __str__(self):
         return str(self.id)
@@ -285,6 +292,19 @@ class Tests(TestCase):
         # Test if we are too close to the top: we cannot go beyont teh topmost node (master),
         # in this case, the method must return None.
         self.assertEqual(None, self.logic.getMatrixTop(self.root.right_guy))
+
+    def testTreeToJson_OneNode(self):
+        node = DummyNode(1, user=DummyUser("user1"))
+        json = self.logic.treeToJson(node)
+        self.assertEqual('{"children": [], "data": {}, "id": "1", "name": "user1 (None)"}', json)
+
+    def testTreeToJson_TwoNodes(self):
+        user1 = DummyUser("user1")
+        node1 = DummyNode(1, user=user1)
+        node2 = DummyNode(2, sponsor=node1, user=DummyUser("user2", user1))
+        node1.left_guy = node2
+        json = self.logic.treeToJson(node1)
+        self.assertEqual('{"children": [], "data": {}, "id": "1", "name": "user1 (None)"}', json)
 
 
 # -----------------------------------------------------------------------------
