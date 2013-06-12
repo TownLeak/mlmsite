@@ -6,5 +6,8 @@ cd $ROOT
 git pull
 pushd DiamondMLM
 ln -sf settings_prod.py settings_actual.py
-sudo /etc/init.d/apache2 reload
 popd
+rm database
+python manage.py syncdb --noinput
+chmod 666 database
+sudo /etc/init.d/apache2 reload
