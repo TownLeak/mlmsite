@@ -142,12 +142,20 @@ class Tests(TestCase):
         self.assertEqual(c.commission, user.money)
         self.assertEqual(-c.commission, master.money)
 
-    def testIsMaster(self):
+    def testUserLeaves_MasterCannotLeave(self):
         c = Controller()
         master = c.getMaster()
-        self.assertTrue(c.isMaster(master))
-        user = Controller.user_type.objects.create(username="Last User", sponsor=master)
-        self.assertFalse(c.isMaster(user))
+        with self.assertRaises(Controller.MasterCannotLeave):
+            c.userLeaves(master)
+        user1 = Controller.user_type.objects.create(username="user1", sponsor=master)
+        user2 = Controller.user_type.objects.create(username="user2", sponsor=user1)
+        self.assertEqual(user2.sponsor.id, user1.id)
+        id = user2.id
+        self.assertTrue(user1.isActive)
+        c.userLeaves(user1)
+        self.assertFalse(user1.isActive)
+        user2 = Controller.user_type.objects.get(id=id)
+        self.assertEqual(user2.sponsor.id, master.id)
 
 
 # -----------------------------------------------------------------------------

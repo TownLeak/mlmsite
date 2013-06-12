@@ -14,6 +14,9 @@ class Controller:
     class LogicError(Exception):
         pass
 
+    class MasterCannotLeave(Exception):
+        pass
+
     user_type = User
     state_type = State
     position_type = Position
@@ -57,7 +60,7 @@ class Controller:
     def createNewPosition(self, user, paid=True):
         pm = PositionManager()
 
-        if self.isMaster(user):
+        if user.isMaster():
             newPosition, isMatrixFull = pm.createNewPositionForMaster(user)
         else:
             newPosition, isMatrixFull = pm.createNewPosition(user.sponsor.active_position, user)
@@ -78,7 +81,7 @@ class Controller:
         logic = BinaryTreeLogic()
         top = logic.getMatrixTop(position)
         # Pay commission to it, except for the master.
-        if not self.isMaster(top.user):
+        if not top.user.isMaster():
             self.payCommission(top.user)
         # Place the root again, to its sponsor's matrix.
         top.user.save()
@@ -99,9 +102,6 @@ class Controller:
     def getMaster(self):
         return User.objects.get(id=1)
 
-    def isMaster(self, user):
-        return user.id == 1
-
     def payFee(self, user):
         # User buys the product, money decrerases
         user.money -= self.price
@@ -110,3 +110,12 @@ class Controller:
         master.money += self.price
         master.save()
         user.save()
+
+    def userLeaves(self, user):
+        if user.isMaster():
+            raise Controller.MasterCannotLeave
+        for u in User.objects.filter(sponsor=user):
+            u.sponsor = self.getMaster()
+            u.save()
+
+        user.leave()

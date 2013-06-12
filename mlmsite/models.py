@@ -28,12 +28,20 @@ class GraphEval_User(models.Model):
     sponsor = models.ForeignKey('GraphEval_User', null=True, related_name='user_sponsor')
     active_position = models.ForeignKey('GraphEval_Position', null=True, related_name='user_position')
     money = models.IntegerField(default=0)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return self.username
 
     def get_full_name(self):
         return self.__str__()
+
+    def isMaster(self):
+        return self.id == 1
+
+    def leave(self):
+        self.isActive = False
+        self.save()
 
 
 class GraphEval_Position(models.Model):

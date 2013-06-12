@@ -8,7 +8,7 @@ class UserModelChoiceField(forms.ModelChoiceField):
 
 
 class GraphEval_SponsorSelectionForm(forms.Form):
-    user = UserModelChoiceField(queryset=Controller.user_type.objects.all())
+    user = UserModelChoiceField(queryset=Controller.user_type.objects.filter(isActive=True))
 
     def save(self):
         c = Controller()
@@ -17,7 +17,7 @@ class GraphEval_SponsorSelectionForm(forms.Form):
 
 
 class GraphEval_UserSelectionForm(forms.Form):
-    user = UserModelChoiceField(queryset=Controller.user_type.objects.all())
+    user = UserModelChoiceField(queryset=Controller.user_type.objects.filter(isActive=True))
 
     def save(self):
         c = Controller()

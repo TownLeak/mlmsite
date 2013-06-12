@@ -296,7 +296,7 @@ class Tests(TestCase):
     def testTreeToJson_OneNode(self):
         node = DummyNode(1, user=DummyUser("user1"))
         json = self.logic.treeToJson(node)
-        self.assertEqual('{"children": [], "data": {}, "id": "1", "name": "user1 (None)"}', json)
+        self.assertEqual("{'children': [], 'data': {}, 'id': '1', 'name': 'user1 (None)'}", str(json))
 
     def testTreeToJson_TwoNodes(self):
         user1 = DummyUser("user1")
@@ -304,7 +304,7 @@ class Tests(TestCase):
         node2 = DummyNode(2, sponsor=node1, user=DummyUser("user2", user1))
         node1.left_guy = node2
         json = self.logic.treeToJson(node1)
-        self.assertEqual('{"children": [], "data": {}, "id": "1", "name": "user1 (None)"}', json)
+        self.assertEqual("{'children': [{'children': [], 'data': {}, 'id': '2', 'name': 'user2 (user1)'}], 'data': {}, 'id': '1', 'name': 'user1 (None)'}", str(json))
 
 
 # -----------------------------------------------------------------------------

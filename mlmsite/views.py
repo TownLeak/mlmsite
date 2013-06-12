@@ -59,8 +59,10 @@ def graph_eval_gyalu(request):
     return HttpResponseRedirect('/graph_eval/')
 
 
-def jit_eval(request):
-    return render(request, "jit_eval.html", {})
+def graph_eval_leave(request, userid):
+    c = Controller()
+    c.userLeaves(Controller.user_type.objects.get(id=userid))
+    return HttpResponseRedirect('/graph_eval/')
 
 
 def bootstrap(request):
