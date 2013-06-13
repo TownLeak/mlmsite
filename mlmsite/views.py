@@ -4,6 +4,7 @@ from userena import views as userena_views
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.core.management import call_command
+from models import User, MasterUser
 
 
 def index(request):
@@ -46,9 +47,8 @@ def graph_eval(request):
 
 def graph_eval_more_users(request):
     c = Controller()
-    master = c.getMaster()
     for i in range(6):
-        user = c.createNewUser(sponsor=master)
+        user = User.CreateNewUser(sponsor=MasterUser.Get())
         c.createNewPosition(user)
     return HttpResponseRedirect('/graph_eval/')
 

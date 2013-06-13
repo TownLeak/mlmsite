@@ -1,55 +1,14 @@
 #from neo4django.db import models
 from django.db import models
+from binary_tree_logic import BinaryTreeLogic
 
 
-# class Distributor(models.NodeModel):
-#     """
-#     Class represents a distributor. A distributor is in fact an MLM position.
-#     An user may participate in several matrixes. Distributors are the nodes
-#     of matrixes. When an user opens a position (starts building a matrix), he creates
-#     a new distributor. A distributor may belong to one user only, ine user
-#     may have several Distributors associated.
-#     """
-
-#     # User ID in the normal database.
-#     userid = models.IntegerProperty()
-
-#     sponsor = models.Relationship('Distributor',
-#                                   rel_type='sponsors',
-#                                   single=True,
-#                                   related_name='sponsored_by')
-
-
-# -----------------
-# Models for graph eval
-# -----------------
-class GraphEval_User(models.Model):
-    username = models.CharField(max_length=64, unique=True)
-    sponsor = models.ForeignKey('GraphEval_User', null=True, related_name='user_sponsor')
-    active_position = models.ForeignKey('GraphEval_Position', null=True, related_name='user_position')
-    money = models.IntegerField(default=0)
-    isActive = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.username
-
-    def get_full_name(self):
-        return self.__str__()
-
-    def isMaster(self):
-        return self.id == 1
-
-    def leave(self):
-        self.isActive = False
-        self.save()
-
-
-class GraphEval_Position(models.Model):
+class Position(models.Model):
     name = models.CharField(max_length=256)
-    user = models.ForeignKey(GraphEval_User)
-    left_guy = models.ForeignKey('GraphEval_Position', null=True, related_name='position_left_guy')
-    right_guy = models.ForeignKey('GraphEval_Position', null=True, related_name="position_right_guy")
-    sponsor = models.ForeignKey('GraphEval_Position', null=True, related_name='position_sponsor')
+    owner = models.ForeignKey('User')
+    left = models.ForeignKey('Position', null=True, related_name='position_left')
+    right = models.ForeignKey('Position', null=True, related_name="position_right")
+    top = models.ForeignKey('Position', null=True, related_name='position_top')
     closed = models.BooleanField(default=False)
 
     def __str__(self):
@@ -58,6 +17,72 @@ class GraphEval_Position(models.Model):
     def get_full_name(self):
         return self.name
 
+    @classmethod
+    def CreateInDatabase(cls, owner):
+        name = "position%d" % len(cls.objects.all())
+        return cls.objects.create(name=name, owner=owner)
 
-class GraphEval_State(models.Model):
-    actual_user = models.ForeignKey(GraphEval_User)
+    def placePosition(self, rootPosition):
+        logic = BinaryTreeLogic()
+        logic.placeNode(rootPosition, self)
+        return logic.isMatrixFull(logic.getMatrixTop(self))
+
+
+class User(models.Model):
+    conf_username = "A Mester"
+    username = models.CharField(max_length=64, unique=True)
+    sponsor = models.ForeignKey('User', null=True, related_name='user_sponsor')
+    active_position = models.ForeignKey(Position, null=True, related_name='user_position')
+    money = models.IntegerField(default=0)
+    isActive = models.BooleanField(default=True)
+
+    class MasterCannotLeave(Exception):
+        pass
+
+    class SponsorMustBeDefined(Exception):
+        pass
+
+    def __str__(self):
+        return self.username
+
+    def get_full_name(self):
+        return self.__str__()
+
+    def leave(self):
+        if self.isMaster():
+            raise User.MasterCannotLeave
+
+        self.isActive = False
+        self.save()
+
+    def addNewActivePosition(self):
+        self.active_position = Position.CreateInDatabase(owner=self)
+        isMatrixFull = self.active_position.placePosition(self.sponsor.active_position) if not self.isMaster() else False
+        self.save()
+        return isMatrixFull
+
+    def isMaster(self):
+        return self.username == User.conf_username
+
+    @classmethod
+    def CreateNewUser(cls, sponsor):
+        if not sponsor:
+            raise User.SponsorMustBeDefined
+        return User.objects.create(username="user%d" % len(User.objects.all()), sponsor=sponsor)
+
+
+class MasterUser(User):
+    @classmethod
+    def Get(cls):
+        try:
+            master = User.objects.get(username=MasterUser.conf_username)
+        except User.DoesNotExist:
+            master = User.objects.create(username=MasterUser.conf_username)
+            master.active_position = Position.CreateInDatabase(owner=master)
+            master.sponsor = master
+            master.save()
+        return master
+
+
+class State(models.Model):
+    actual_user = models.ForeignKey(User)

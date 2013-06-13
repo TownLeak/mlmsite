@@ -1,5 +1,6 @@
 from django import forms
 from controller import Controller
+from models import User
 
 
 class UserModelChoiceField(forms.ModelChoiceField):
@@ -12,7 +13,7 @@ class GraphEval_SponsorSelectionForm(forms.Form):
 
     def save(self):
         c = Controller()
-        user = c.createNewUser(sponsor=self.cleaned_data['user'])
+        user = User.CreateNewUser(sponsor=self.cleaned_data['user'])
         c.createNewPosition(user)
 
 

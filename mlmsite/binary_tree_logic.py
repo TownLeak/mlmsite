@@ -41,8 +41,8 @@ class BinaryTreeLogic:
             root = None
 
         if root:
-            queue.append(root.left_guy)
-            queue.append(root.right_guy)
+            queue.append(root.left)
+            queue.append(root.right)
         else:
             queue.append(None)
             queue.append(None)
@@ -86,7 +86,7 @@ class BinaryTreeLogic:
             if not node:
                 return False
 
-            node = node.right_guy
+            node = node.right
 
         return True
 
@@ -97,9 +97,9 @@ class BinaryTreeLogic:
         for i in range(self._levelsOfFullMatrix - 1):
             # If actual node has no sponsor, it means that we reached the top of the tree (master).
             # In this case, master is the owner.
-            if not node.sponsor:
+            if not node.top:
                 return None
-            node = node.sponsor
+            node = node.top
 
         return node
 
@@ -112,13 +112,13 @@ class BinaryTreeLogic:
             raise BinaryTreeLogic.NodeIsEmpty
 
         if side == "left":
-            node.left_guy = newNode
+            node.left = newNode
         elif side == "right":
-            node.right_guy = newNode
+            node.right = newNode
         else:
             raise BinaryTreeLogic.LogicError
 
-        newNode.sponsor = node
+        newNode.top = node
         node.save()
         newNode.save()
 
@@ -133,11 +133,11 @@ class BinaryTreeLogic:
             raise BinaryTreeLogic.NodeIsEmpty
         # If left node is full: put it go to the queue, take right node
         # else set good node to left node
-        if actualNode.left_guy:
-            queue.append(actualNode.left_guy)
+        if actualNode.left:
+            queue.append(actualNode.left)
             # if right node is full, put it to the queue, restart with the left node as root
-            if actualNode.right_guy:
-                queue.append(actualNode.right_guy)
+            if actualNode.right:
+                queue.append(actualNode.right)
                 (actualNode, side) = self._placeNodeRecursiveLogic(queue)
             # else set good node to right node
             else:
@@ -153,14 +153,14 @@ class BinaryTreeLogic:
 
     def _treeToJsonRecursive(self, root):
         children = []
-        if root.left_guy:
-            children.append(self.treeToJson(root.left_guy))
-        if root.right_guy:
-            children.append(self.treeToJson(root.right_guy))
+        if root.left:
+            children.append(self.treeToJson(root.left))
+        if root.right:
+            children.append(self.treeToJson(root.right))
 
-        name = (u'%s (%s)') % (root.user.username, root.user.sponsor.username if root.user.sponsor else "None")
+        name = (u'%s (%s)') % (root.owner.username, root.owner.sponsor.username if root.owner.sponsor else "None")
         name = unicodedata.normalize("NFKD", name).encode('ascii', 'ignore')
-     
+
         return {
             'id': ('%d' % root.id),
             'name': name,
