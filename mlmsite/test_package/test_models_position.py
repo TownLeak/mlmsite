@@ -8,9 +8,6 @@ class Tests(TestCase):
         owner = User.objects.create(username="user")
         position = Position.CreateInDatabase(owner)
         self.assertEqual(owner.id, position.owner.id)
-        self.assertFalse(position.left)
-        self.assertFalse(position.right)
-        self.assertFalse(position.top)
         self.assertFalse(position.closed)
 
 

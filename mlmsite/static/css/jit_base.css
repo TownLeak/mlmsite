@@ -1,4 +1,12 @@
-#infovis {
+#infovis_binary {
+    position:relative;
+    width:600px;
+    height:300px;
+    margin:auto;
+    background-color:#555;
+}
+
+#infovis_unilevel {
     position:relative;
     width:600px;
     height:300px;

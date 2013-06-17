@@ -1,14 +1,13 @@
 #from neo4django.db import models
 from django.db import models
-from binary_tree_logic import BinaryTreeLogic
+from binary_tree import BinaryTree
+#from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Position(models.Model):
     name = models.CharField(max_length=256)
     owner = models.ForeignKey('User')
-    left = models.ForeignKey('Position', null=True, related_name='position_left')
-    right = models.ForeignKey('Position', null=True, related_name="position_right")
-    top = models.ForeignKey('Position', null=True, related_name='position_top')
+    #parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     closed = models.BooleanField(default=False)
 
     def __str__(self):
@@ -22,8 +21,14 @@ class Position(models.Model):
         name = "position%d" % len(cls.objects.all())
         return cls.objects.create(name=name, owner=owner)
 
+
+class BinaryPosition(Position):
+    left = models.ForeignKey('BinaryPosition', null=True, related_name='position_left')
+    right = models.ForeignKey('BinaryPosition', null=True, related_name="position_right")
+    top = models.ForeignKey('BinaryPosition', null=True, related_name='position_sponsor')
+
     def placePosition(self, rootPosition):
-        logic = BinaryTreeLogic()
+        logic = BinaryTree()
         logic.placeNode(rootPosition, self)
         return logic.isMatrixFull(logic.getMatrixTop(self))
 
@@ -32,7 +37,8 @@ class User(models.Model):
     conf_username = "A Mester"
     username = models.CharField(max_length=64, unique=True)
     sponsor = models.ForeignKey('User', null=True, related_name='user_sponsor')
-    active_position = models.ForeignKey(Position, null=True, related_name='user_position')
+    active_binary_position = models.ForeignKey(BinaryPosition, null=True, related_name='user_binary_position')
+    #active_unilevel_position = models.ForeignKey('UnilevelPosition', null=True, related_name='user_unilevel_position')
     money = models.IntegerField(default=0)
     isActive = models.BooleanField(default=True)
 
@@ -55,9 +61,9 @@ class User(models.Model):
         self.isActive = False
         self.save()
 
-    def addNewActivePosition(self):
-        self.active_position = Position.CreateInDatabase(owner=self)
-        isMatrixFull = self.active_position.placePosition(self.sponsor.active_position) if not self.isMaster() else False
+    def addNewActiveBinaryPosition(self):
+        self.active_binary_position = BinaryPosition.CreateInDatabase(owner=self)
+        isMatrixFull = self.active_binary_position.placePosition(self.sponsor.active_binary_position) if not self.isMaster() else False
         self.save()
         return isMatrixFull
 
@@ -78,11 +84,23 @@ class MasterUser(User):
             master = User.objects.get(username=MasterUser.conf_username)
         except User.DoesNotExist:
             master = User.objects.create(username=MasterUser.conf_username)
-            master.active_position = Position.CreateInDatabase(owner=master)
+            master.active_binary_position = BinaryPosition.CreateInDatabase(owner=master)
             master.sponsor = master
             master.save()
         return master
 
 
 class State(models.Model):
+    BINARY_TREE = 'B'
+    UNILEVEL_TREE = 'U'
     actual_user = models.ForeignKey(User)
+    tree_view = models.CharField(max_length=1, choices=(
+        (BINARY_TREE, "Binary"),
+        (UNILEVEL_TREE, "Unilevel")),
+        default=BINARY_TREE
+    )
+
+
+# class UnilevelPosition(MPTTModel):
+#     name = models.CharField(max_length=256)
+#     owner = models.ForeignKey(User)

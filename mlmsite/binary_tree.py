@@ -4,7 +4,7 @@ from collections import deque
 import unicodedata
 
 
-class BinaryTreeLogic:
+class BinaryTree:
     _levelsOfFullMatrix = 3
 
     class NodeIsEmpty:
@@ -55,7 +55,7 @@ class BinaryTreeLogic:
     def getTreeOf(self, root, depth):
         # root cannot be invalid
         if not root:
-            raise BinaryTreeLogic.NodeIsEmpty
+            raise BinaryTree.NodeIsEmpty
         # Root is the first list element. Initialize the retrieval logic with it:
         # Create empty queue, add the root
         queue = deque([root])
@@ -71,10 +71,10 @@ class BinaryTreeLogic:
            traversal. It will then fill the tree left-to-right, level-by-level."""
         # If root is empty, yield error
         if not root:
-            raise BinaryTreeLogic.NodeIsEmpty
+            raise BinaryTree.NodeIsEmpty
 
         if not newNode:
-            raise BinaryTreeLogic.NodeIsEmpty
+            raise BinaryTree.NodeIsEmpty
         # Initialize the placement activity: create an empty queue, add the root to it,
         # then invoke the placement logic. Placement logic works with the queue.
         queue = deque([root])
@@ -93,9 +93,9 @@ class BinaryTreeLogic:
     def getMatrixTop(self, node):
         """Determine who gets the commission if with the placement of node, a matrix gets full."""
         if not node:
-            raise BinaryTreeLogic.NodeIsEmpty
+            raise BinaryTree.NodeIsEmpty
         for i in range(self._levelsOfFullMatrix - 1):
-            # If actual node has no sponsor, it means that we reached the top of the tree (master).
+            # If actual node has no top, it means that we reached the top of the tree (master).
             # In this case, master is the owner.
             if not node.top:
                 return None
@@ -106,17 +106,17 @@ class BinaryTreeLogic:
     def _commitNewNode(self, node, side, newNode):
         """Saves a new child of a node (commits to the database)"""
         if not node or not side:
-            raise BinaryTreeLogic.LogicError
+            raise BinaryTree.LogicError
 
         if not newNode:
-            raise BinaryTreeLogic.NodeIsEmpty
+            raise BinaryTree.NodeIsEmpty
 
         if side == "left":
             node.left = newNode
         elif side == "right":
             node.right = newNode
         else:
-            raise BinaryTreeLogic.LogicError
+            raise BinaryTree.LogicError
 
         newNode.top = node
         node.save()
@@ -125,12 +125,12 @@ class BinaryTreeLogic:
     def _placeNodeRecursiveLogic(self, queue):
         # If queue empty, yield error. If newNode is none, yield error.
         if not queue:
-            raise BinaryTreeLogic.QueueIsEmpty
+            raise BinaryTree.QueueIsEmpty
         # Pop from the queue. If it is empty, yield error (the algorithm cannot place empty
         # node to the queue, beacuse the first empty node found is the placement node)
         actualNode = queue.popleft()
         if not actualNode:
-            raise BinaryTreeLogic.NodeIsEmpty
+            raise BinaryTree.NodeIsEmpty
         # If left node is full: put it go to the queue, take right node
         # else set good node to left node
         if actualNode.left:
@@ -147,7 +147,7 @@ class BinaryTreeLogic:
         # Here, good node contains an empty node for placement.
         # Ensure that it is really empty.
         if not side:
-            raise BinaryTreeLogic.NodeIsNotEmpty
+            raise BinaryTree.NodeIsNotEmpty
         # Return the good node for placement
         return (actualNode, side)
 
@@ -170,4 +170,3 @@ class BinaryTreeLogic:
 
     def treeToJson(self, root):
         return self._treeToJsonRecursive(root)
-        #return json.dumps(self._treeToJsonRecursive(root))

@@ -14,7 +14,6 @@ def index(request):
 
 from forms import GraphEval_UserSelectionForm, GraphEval_SponsorSelectionForm
 from controller import Controller
-from binary_tree_logic import BinaryTreeLogic
 
 
 def graph_eval(request):
@@ -34,22 +33,19 @@ def graph_eval(request):
         sponsorSelectionForm = GraphEval_SponsorSelectionForm(prefix="sponsor")
 
     c = Controller()
-    nodes = c.getActualData()
-    logic = BinaryTreeLogic()
 
     return render(request, "graph_eval.html", {
         "actual_user": c.getActualUser(),
         "userSelectionForm": userSelectionForm,
         "sponsorSelectionForm": sponsorSelectionForm,
-        "nodes": nodes,
-        "json_data": logic.treeToJson(c.getActualUser().active_position)})
+        "tree_data": c.getActualTree()})
 
 
 def graph_eval_more_users(request):
     c = Controller()
     for i in range(6):
         user = User.CreateNewUser(sponsor=MasterUser.Get())
-        c.createNewPosition(user)
+        c.createNewBinaryPosition(user)
     return HttpResponseRedirect('/graph_eval/')
 
 

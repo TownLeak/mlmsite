@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     'accounts',
     'django_countries',
     'south',
+    'mptt',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -14,7 +14,7 @@ class GraphEval_SponsorSelectionForm(forms.Form):
     def save(self):
         c = Controller()
         user = User.CreateNewUser(sponsor=self.cleaned_data['user'])
-        c.createNewPosition(user)
+        c.createNewBinaryPosition(user)
 
 
 class GraphEval_UserSelectionForm(forms.Form):

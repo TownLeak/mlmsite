@@ -1,34 +1,57 @@
 import unittest
 from django.test import TestCase
-from mlmsite.binary_tree_logic import BinaryTreeLogic
+from mlmsite.binary_tree import BinaryTree
 from collections import deque
-from mlmsite.models import Position, User
+from mlmsite.models import BinaryPosition
+from mlmsite.models import User
+
+
+class DummyUser:
+    def __init__(self, username, sponsor=None):
+        self.username = username
+        self.sponsor = sponsor
+
+
+class DummyNode:
+    def __init__(self, id, top=None, owner=None):
+        self.saved = False
+        self.id = id
+        self.right = None
+        self.left = None
+        self.top = top
+        self.isCommissionPaid = False
+        self.owner = owner
+
+    def __str__(self):
+        return str(self.id)
+
+    def save(self):
+        self.saved = True
+
+    def payCommission(self):
+        self.isCommissionPaid = True
 
 
 class Tests(TestCase):
-    def _createTestPosition(self, owner=None):
-        realOwner = User.objects.create(username="User %d" % len(User.objects.all())) if not owner else owner
-        return Position.CreateInDatabase(owner=realOwner)
-
     def setUp(self):
-        self.root = self._createTestPosition()
-        self.logic = BinaryTreeLogic()
+        self.root = DummyNode(1)
+        self.logic = BinaryTree()
 
     def testPlaceNodeCatchEmptyNodes(self):
         notEmptyNode = 1
 
-        with self.assertRaises(BinaryTreeLogic.NodeIsEmpty):
+        with self.assertRaises(BinaryTree.NodeIsEmpty):
             self.logic.placeNode(None, notEmptyNode)
 
-        with self.assertRaises(BinaryTreeLogic.NodeIsEmpty):
+        with self.assertRaises(BinaryTree.NodeIsEmpty):
             self.logic.placeNode(notEmptyNode, None)
 
     def testPlaceNodeRecursiveLogicCatchEmpties(self):
-        with self.assertRaises(BinaryTreeLogic.QueueIsEmpty):
+        with self.assertRaises(BinaryTree.QueueIsEmpty):
             queue = deque([])
             self.logic._placeNodeRecursiveLogic(queue)
 
-        with self.assertRaises(BinaryTreeLogic.NodeIsEmpty):
+        with self.assertRaises(BinaryTree.NodeIsEmpty):
             queue = deque([None])
             self.logic._placeNodeRecursiveLogic(queue)
 
@@ -39,74 +62,82 @@ class Tests(TestCase):
         self.assertEqual(actualNode, self.root)
 
     def testPlaceNodeRecursiveLogicTestRightPlacement(self):
-        self.root.left = self._createTestPosition()
+        self.root.left = DummyNode(2)
         queue = deque([self.root])
         (actualNode, side) = self.logic._placeNodeRecursiveLogic(queue)
         self.assertEqual(side, "right")
         self.assertEqual(actualNode, self.root)
 
     def testPlaceNodeRecursiveLogicTestOneLevelDown(self):
-        self.root.left = self._createTestPosition()
-        self.root.right = self._createTestPosition()
-        self.root.left.left = self._createTestPosition()
+        self.root.left = DummyNode(2)
+        self.root.right = DummyNode(3)
+        self.root.left.left = DummyNode(4)
         queue = deque([self.root])
         (actualNode, side) = self.logic._placeNodeRecursiveLogic(queue)
         self.assertEqual(side, "right")
         self.assertEqual(actualNode, self.root.left)
 
     def testPlaceNodeRecursiveLogicTestOneLevelDownThreeNodesRight(self):
-        self.root.left = self._createTestPosition()
-        self.root.right = self._createTestPosition()
-        self.root.left.left = self._createTestPosition()
-        self.root.left.right = self._createTestPosition()
+        self.root.left = DummyNode(2)
+        self.root.right = DummyNode(3)
+        self.root.left.left = DummyNode(4)
+        self.root.left.right = DummyNode(5)
         queue = deque([self.root])
         (actualNode, side) = self.logic._placeNodeRecursiveLogic(queue)
         self.assertEqual(side, "left")
         self.assertEqual(actualNode, self.root.right)
 
+    def testPlaceNodeSaves(self):
+        newNode = DummyNode(2)
+        self.assertFalse(self.root.saved)
+        self.assertEqual(self.root.left, None)
+        self.logic.placeNode(self.root, newNode)
+        self.assertEqual(self.root.left, newNode)
+        self.assertTrue(self.root.saved)
+
     def testCommitNewNode(self):
-        node = self._createTestPosition()
-        newNode = self._createTestPosition()
+        node = DummyNode(1)
+        newNode = DummyNode(2)
         newNode.sponsor = node
 
-        with self.assertRaises(BinaryTreeLogic.LogicError):
+        with self.assertRaises(BinaryTree.LogicError):
             self.logic._commitNewNode(None, "left", node)
 
-        with self.assertRaises(BinaryTreeLogic.LogicError):
+        with self.assertRaises(BinaryTree.LogicError):
             self.logic._commitNewNode(node, "", node)
 
-        with self.assertRaises(BinaryTreeLogic.NodeIsEmpty):
+        with self.assertRaises(BinaryTree.NodeIsEmpty):
             self.logic._commitNewNode(node, "left", None)
 
-        with self.assertRaises(BinaryTreeLogic.LogicError):
+        with self.assertRaises(BinaryTree.LogicError):
             self.logic._commitNewNode(node, "atyala", node)
 
         self.logic._commitNewNode(node, "left", newNode)
         self.assertTrue(node.left)
-        self.assertEqual(node.left.id, newNode.id)
+        self.assertEqual(node.left.id, 2)
         self.assertFalse(node.right)
         self.assertEqual(newNode.sponsor, node)
 
-        node = self._createTestPosition()
+        node = DummyNode(1)
         newNode.sponsor = node
         self.logic._commitNewNode(node, "right", newNode)
         self.assertTrue(node.right)
-        self.assertEqual(node.right.id, newNode.id)
+        self.assertEqual(node.right.id, 2)
         self.assertFalse(node.left)
         self.assertEqual(newNode.sponsor, node)
 
     def _testPersistencyCreate(self):
         user = User.objects.create(username="user1")
-        self.root = Position.objects.create(name="pos1", owner=user)
-        newNode = Position.objects.create(name="pos2", owner=user)
+        self.root = BinaryPosition.objects.create(name="pos1", owner=user)
+        newNode = BinaryPosition.objects.create(name="pos2", owner=user)
         self.assertEqual(self.root.left, None)
         self.logic.placeNode(self.root, newNode)
         self.assertEqual(self.root.left, newNode)
 
     def testPersistency(self):
         self._testPersistencyCreate()
-        self.root = Position.objects.get(name="pos1")
-        newNode = Position.objects.get(name="pos2")
+        self.root = BinaryPosition.objects.get(name="pos1")
+        newNode = BinaryPosition.objects.get(name="pos2")
         self.assertTrue(self.root)
         self.assertTrue(newNode)
         self.assertEqual(self.root.left, newNode)
@@ -134,7 +165,7 @@ class Tests(TestCase):
         self.assertFalse(listOfNodes)
 
     def testGetTreeOfRecursiveLogicDepth1(self):
-        node = self._createTestPosition()
+        node = DummyNode(1)
         queue = deque([node])
         listOfNodes = []
         self.logic._getTreeOfRecursiveLogic(queue, listOfNodes, 1)
@@ -142,9 +173,9 @@ class Tests(TestCase):
         self.assertEqual(listOfNodes[0], node)
 
     def testGetTreeOfRecursiveLogicDepth2Full(self):
-        node = self._createTestPosition()
-        node.left = self._createTestPosition()
-        node.right = self._createTestPosition()
+        node = DummyNode(1)
+        node.left = DummyNode(2)
+        node.right = DummyNode(3)
         queue = deque([node])
         listOfNodes = []
         # 3: number of returned elements at level 2 (1 + 2...)
@@ -155,10 +186,10 @@ class Tests(TestCase):
         self.assertEqual(listOfNodes[2], node.right)
 
     def testGetTreeOfRecursiveLogicDepth3PartialOnLeft(self):
-        node = self._createTestPosition()
-        node.left = self._createTestPosition()
-        node.right = self._createTestPosition()
-        node.left.left = self._createTestPosition()
+        node = DummyNode(1)
+        node.left = DummyNode(2)
+        node.right = DummyNode(3)
+        node.left.left = DummyNode(4)
         queue = deque([node])
         listOfNodes = []
         # 7: number of returned elements at level 3 (1 + 2 + 4...)
@@ -173,10 +204,10 @@ class Tests(TestCase):
         self.assertFalse(listOfNodes[6])
 
     def testGetTreeOfRecursiveLogicDepth3PartialOnRight(self):
-        node = self._createTestPosition()
-        node.left = self._createTestPosition()
-        node.right = self._createTestPosition()
-        node.right.left = self._createTestPosition()
+        node = DummyNode(1)
+        node.left = DummyNode(2)
+        node.right = DummyNode(3)
+        node.right.left = DummyNode(4)
         queue = deque([node])
         listOfNodes = []
         # 7: number of returned elements at level 3 (1 + 2 + 4...)
@@ -191,16 +222,16 @@ class Tests(TestCase):
         self.assertFalse(listOfNodes[6])
 
     def testGetTreeOfNullRoot(self):
-        with self.assertRaises(BinaryTreeLogic.NodeIsEmpty):
+        with self.assertRaises(BinaryTree.NodeIsEmpty):
             self.logic.getTreeOf(None, 2)
 
-        listOfNodes = self.logic.getTreeOf(self._createTestPosition(), 0)
+        listOfNodes = self.logic.getTreeOf(DummyNode(0), 0)
         self.assertFalse(listOfNodes)
 
     def testGetTreeOfDepth2(self):
-        node = self._createTestPosition()
-        node.left = self._createTestPosition()
-        node.right = self._createTestPosition()
+        node = DummyNode(1)
+        node.left = DummyNode(2)
+        node.right = DummyNode(3)
         listOfNodes = self.logic.getTreeOf(node, 2)
         self.assertEqual(len(listOfNodes), 3)
         self.assertEqual(listOfNodes[0], node)
@@ -209,23 +240,23 @@ class Tests(TestCase):
 
     def testIsMatrixFull(self):
         self.logic._levelsOfFullMatrix = 2
-        node = self._createTestPosition()
+        node = DummyNode(1)
         self.assertFalse(self.logic.isMatrixFull(node))
-        node.left = self._createTestPosition()
+        node.left = DummyNode(2)
         self.assertFalse(self.logic.isMatrixFull(node))
-        node.right = self._createTestPosition()
+        node.right = DummyNode(3)
         self.assertTrue(self.logic.isMatrixFull(node))
 
     def _testHandleFullMatrixOnePlacement(self):
         self.logic._levelsOfFullMatrix = 2
 
-        with self.assertRaises(BinaryTreeLogic.NodeIsEmpty):
+        with self.assertRaises(BinaryTree.NodeIsEmpty):
             self.logic._handleFullMatrix(None)
         # Set up test
-        self.logic.placeNode(self.root, self._createTestPosition())
-        self.logic.placeNode(self.root, self._createTestPosition())
-        self.logic.placeNode(self.root.left, self._createTestPosition())
-        self.logic.placeNode(self.root.left, self._createTestPosition())
+        self.logic.placeNode(self.root, DummyNode(2))
+        self.logic.placeNode(self.root, DummyNode(3))
+        self.logic.placeNode(self.root.left, DummyNode(4))
+        self.logic.placeNode(self.root.left, DummyNode(5))
         self.assertFalse(self.root.isCommissionPaid)
         # Test body
         self.assertFalse(self.root.right.left)
@@ -242,7 +273,7 @@ class Tests(TestCase):
         self.assertEqual(side, "left")
         self.assertFalse(isMatrixFull)
         # Test that in case of not full matrix, isMatrixFull is true
-        self.root.left = self._createTestPosition()
+        self.root.left = DummyNode(2)
         queue = deque([self.root])
         (node, side, isMatrixFull) = self.logic._placeNodeRecursiveLogic(queue, 1)
         self.assertEqual(node, self.root)
@@ -251,29 +282,29 @@ class Tests(TestCase):
 
     def testGetMatrixTop(self):
         self.logic._levelsOfFullMatrix = 2
-        self.logic.placeNode(self.root, self._createTestPosition())
-        self.logic.placeNode(self.root.left, self._createTestPosition())
+        self.logic.placeNode(self.root, DummyNode(2))
+        self.logic.placeNode(self.root.left, DummyNode(3))
         self.assertEqual(self.root, self.logic.getMatrixTop(self.root.left))
         self.logic._levelsOfFullMatrix = 3
-        self.logic.placeNode(self.root, self._createTestPosition())
-        self.logic.placeNode(self.root.right, self._createTestPosition())
+        self.logic.placeNode(self.root, DummyNode(4))
+        self.logic.placeNode(self.root.right, DummyNode(5))
         self.assertEqual(self.root, self.logic.getMatrixTop(self.root.right.left))
         # Test if we are too close to the top: we cannot go beyont teh topmost node (master),
         # in this case, the method must return None.
         self.assertEqual(None, self.logic.getMatrixTop(self.root.right))
 
     def testTreeToJson_OneNode(self):
-        node = Position.CreateInDatabase(owner=User.objects.create(username="user1"))
+        node = DummyNode(1, owner=DummyUser("user1"))
         json = self.logic.treeToJson(node)
-        self.assertEqual("{'children': [], 'data': {}, 'id': '%d', 'name': 'user1 (None)'}" % node.id, str(json))
+        self.assertEqual("{'children': [], 'data': {}, 'id': '1', 'name': 'user1 (None)'}", str(json))
 
     def testTreeToJson_TwoNodes(self):
-        user1 = User.objects.create(username="user1")
-        node1 = Position.CreateInDatabase(owner=user1)
-        node2 = Position.objects.create(name="Name", top=node1, owner=User.objects.create(username="user2", sponsor=user1))
+        user1 = DummyUser("user1")
+        node1 = DummyNode(1, owner=user1)
+        node2 = DummyNode(2, top=node1, owner=DummyUser("user2", user1))
         node1.left = node2
         json = self.logic.treeToJson(node1)
-        self.assertEqual("{'children': [{'children': [], 'data': {}, 'id': '%d', 'name': 'user2 (user1)'}], 'data': {}, 'id': '%d', 'name': 'user1 (None)'}" % (node2.id, node1.id), str(json))
+        self.assertEqual("{'children': [{'children': [], 'data': {}, 'id': '2', 'name': 'user2 (user1)'}], 'data': {}, 'id': '1', 'name': 'user1 (None)'}", str(json))
 
 
 # -----------------------------------------------------------------------------

@@ -20,12 +20,12 @@
         <!-- JIT Library File -->
         <script language="javascript" type="text/javascript" src="{% static "js/jit.js" %}"></script>
         <!-- Example File -->
-        <script language="javascript" type="text/javascript" src="{% static "js/jit_eval.js" %}"></script>
+        <script language="javascript" type="text/javascript" src="{% static "js/draw_tree.js" %}"></script>
 
         <script>
             function create_data() { 
                 {% autoescape off %}
-                    return {{ json_data }};
+                    return {{ tree_data }};
                 {% endautoescape %}
             }
         </script>
@@ -90,16 +90,23 @@
                 <div class="span9">
                     <h2>A mátrix</h2>
                     <div class="row-fluid">
-                        <div class="span9" id="infovis"></div>
+                        <div class="span9" id="infovis_binary"></div>
                         <div id="log"></div>
-                    </div>    
-                    {% if nodes != None %}
-                        <h4>{{ nodes.0 }} állapota</h4>
-                        <ul>
-                            <li>Fizetés állapota: <b>rendben</b></li>
-                            <li>Pénzem: {{ actual_user.money }}</li>
-                            <li>Mátrix állapota: {{ matrix_state }}</li>
-                        </ul>
+                    </div>
+                    <hr />
+                    <div class="row-fluid">
+                        <div class="span9" id="infovis_unilevel"></div>
+                        <div id="log"></div>
+                    </div> 
+                    {% if actual_user != None %}
+                        {% if actual_user.active_position != None %}
+                            <h4>{{ actual_user.active_position.name }} állapota</h4>
+                            <ul>
+                                <li>Fizetés állapota: <b>rendben</b></li>
+                                <li>Pénzem: {{ actual_user.money }}</li>
+                                <li>Mátrix állapota: {{ matrix_state }}</li>
+                            </ul>
+                        {% endif %}
                     {% endif %}
                     <hr />
                     <h4>Mérleg</h4>
