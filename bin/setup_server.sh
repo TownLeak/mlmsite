@@ -37,6 +37,7 @@ $EASY_INSTALL South
 $EASY_INSTALL django-countries
 $EASY_INSTALL django-userena
 $EASY_INSTALL django-bootstrap-toolkit
+$EASY_INSTALL django-mptt
 sudo apt-get build-dep python-imaging
 chmod 777 $SITE_ROOT # http://bit.ly/13e3jU4
 
