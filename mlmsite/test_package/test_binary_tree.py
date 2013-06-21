@@ -13,12 +13,12 @@ class DummyUser:
 
 
 class DummyNode:
-    def __init__(self, id, top=None, owner=None):
+    def __init__(self, id, parent=None, owner=None):
         self.saved = False
         self.id = id
         self.right = None
         self.left = None
-        self.top = top
+        self.parent = parent
         self.isCommissionPaid = False
         self.owner = owner
 
@@ -152,91 +152,6 @@ class Tests(TestCase):
         self.assertEqual(3, self.logic._sumOfSquares(2))
         self.assertEqual(7, self.logic._sumOfSquares(3))
 
-    def testGetTreeOfRecursiveLogicDepth0(self):
-        queue = deque([])
-        listOfNodes = self.logic._getTreeOfRecursiveLogic(queue, [], 2)
-        self.assertEqual(listOfNodes, [None, None])
-
-        queue = deque([None])
-        listOfNodes = self.logic._getTreeOfRecursiveLogic(queue, [], 2)
-        self.assertEqual(listOfNodes, [None, None])
-
-        listOfNodes = self.logic._getTreeOfRecursiveLogic(queue, [], 0)
-        self.assertFalse(listOfNodes)
-
-    def testGetTreeOfRecursiveLogicDepth1(self):
-        node = DummyNode(1)
-        queue = deque([node])
-        listOfNodes = []
-        self.logic._getTreeOfRecursiveLogic(queue, listOfNodes, 1)
-        self.assertEqual(len(listOfNodes), 1)
-        self.assertEqual(listOfNodes[0], node)
-
-    def testGetTreeOfRecursiveLogicDepth2Full(self):
-        node = DummyNode(1)
-        node.left = DummyNode(2)
-        node.right = DummyNode(3)
-        queue = deque([node])
-        listOfNodes = []
-        # 3: number of returned elements at level 2 (1 + 2...)
-        self.logic._getTreeOfRecursiveLogic(queue, listOfNodes, 3)
-        self.assertEqual(len(listOfNodes), 3)
-        self.assertEqual(listOfNodes[0], node)
-        self.assertEqual(listOfNodes[1], node.left)
-        self.assertEqual(listOfNodes[2], node.right)
-
-    def testGetTreeOfRecursiveLogicDepth3PartialOnLeft(self):
-        node = DummyNode(1)
-        node.left = DummyNode(2)
-        node.right = DummyNode(3)
-        node.left.left = DummyNode(4)
-        queue = deque([node])
-        listOfNodes = []
-        # 7: number of returned elements at level 3 (1 + 2 + 4...)
-        self.logic._getTreeOfRecursiveLogic(queue, listOfNodes, 7)
-        self.assertEqual(len(listOfNodes), 7)
-        self.assertEqual(listOfNodes[0], node)
-        self.assertEqual(listOfNodes[1], node.left)
-        self.assertEqual(listOfNodes[2], node.right)
-        self.assertEqual(listOfNodes[3], node.left.left)
-        self.assertFalse(listOfNodes[4])
-        self.assertFalse(listOfNodes[5])
-        self.assertFalse(listOfNodes[6])
-
-    def testGetTreeOfRecursiveLogicDepth3PartialOnRight(self):
-        node = DummyNode(1)
-        node.left = DummyNode(2)
-        node.right = DummyNode(3)
-        node.right.left = DummyNode(4)
-        queue = deque([node])
-        listOfNodes = []
-        # 7: number of returned elements at level 3 (1 + 2 + 4...)
-        self.logic._getTreeOfRecursiveLogic(queue, listOfNodes, 7)
-        self.assertEqual(len(listOfNodes), 7)
-        self.assertEqual(listOfNodes[0], node)
-        self.assertEqual(listOfNodes[1], node.left)
-        self.assertEqual(listOfNodes[2], node.right)
-        self.assertFalse(listOfNodes[3])
-        self.assertFalse(listOfNodes[4])
-        self.assertEqual(listOfNodes[5], node.right.left)
-        self.assertFalse(listOfNodes[6])
-
-    def testGetTreeOfNullRoot(self):
-        with self.assertRaises(BinaryTree.NodeIsEmpty):
-            self.logic.getTreeOf(None, 2)
-
-        listOfNodes = self.logic.getTreeOf(DummyNode(0), 0)
-        self.assertFalse(listOfNodes)
-
-    def testGetTreeOfDepth2(self):
-        node = DummyNode(1)
-        node.left = DummyNode(2)
-        node.right = DummyNode(3)
-        listOfNodes = self.logic.getTreeOf(node, 2)
-        self.assertEqual(len(listOfNodes), 3)
-        self.assertEqual(listOfNodes[0], node)
-        self.assertEqual(listOfNodes[1], node.left)
-        self.assertEqual(listOfNodes[2], node.right)
 
     def testIsMatrixFull(self):
         self.logic._levelsOfFullMatrix = 2
@@ -289,7 +204,7 @@ class Tests(TestCase):
         self.logic.placeNode(self.root, DummyNode(4))
         self.logic.placeNode(self.root.right, DummyNode(5))
         self.assertEqual(self.root, self.logic.getMatrixTop(self.root.right.left))
-        # Test if we are too close to the top: we cannot go beyont teh topmost node (master),
+        # Test if we are too close to the parent: we cannot go beyont teh parentmost node (master),
         # in this case, the method must return None.
         self.assertEqual(None, self.logic.getMatrixTop(self.root.right))
 
@@ -301,7 +216,7 @@ class Tests(TestCase):
     def testTreeToJson_TwoNodes(self):
         user1 = DummyUser("user1")
         node1 = DummyNode(1, owner=user1)
-        node2 = DummyNode(2, top=node1, owner=DummyUser("user2", user1))
+        node2 = DummyNode(2, parent=node1, owner=DummyUser("user2", user1))
         node1.left = node2
         json = self.logic.treeToJson(node1)
         self.assertEqual("{'children': [{'children': [], 'data': {}, 'id': '2', 'name': 'user2 (user1)'}], 'data': {}, 'id': '1', 'name': 'user1 (None)'}", str(json))

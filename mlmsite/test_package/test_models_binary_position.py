@@ -1,9 +1,10 @@
 import unittest
 from django.test import TestCase
+from mlmsite.models import BinaryPosition, User
 
 
 class Tests(TestCase):
-    def testLeftRight(self):
+    def test(self):
         pass
 
 

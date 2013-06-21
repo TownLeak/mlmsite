@@ -35,7 +35,7 @@ function init(){
     //Create a new ST instance
     var st = new $jit.ST({
         //id of viz container element
-        injectInto: 'infovis_binary',
+        injectInto: 'infovis',
         //set duration for the animation
         duration: 100,
         //set animation transition type

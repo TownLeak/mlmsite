@@ -39,14 +39,12 @@
             <section class="row-fluid">
                 <div class="span3">
                     <p><b>Szimulációs menü</p></b>
-
+                    <hr />
                     <p><a href="/graph_eval/gyalu/">GYALU</a>. Klikkelj erre, és reszeltek az adatbázisnak, kezded a nulláról.</p>
-
+                    <hr />
                     <p><a href="/graph_eval/more_users/">Csinálj 6 usert azonnal a mester alá</a></p>
-
-                    <p>Új felhasználó csinálása. Nem kell kitölteni adatokat, csinál neked egy új kamu "felhasználót" azonnal. Válassz szponzort, OK-ra csinálja a felhasználót.</p>
-
-                    <p>Ez leszimulál egy sikeres vásárlást is, tehát az új felhasználó befizetett, stb.</p>
+                    <hr />
+                    <p>Új felhasználó csinálása. Nem kell kitölteni adatokat, csinál neked egy új kamu "felhasználót" azonnal. Válassz szponzort, OK-ra csinálja a felhasználót. Ez leszimulál egy sikeres vásárlást is, tehát az új felhasználó befizetett, stb. A játék kedvéért, a kliens befizet a havidíjas cucckerájra is, szóval megjelenik minden mátrixban.</p>
                     <p>
                         <form action="" method="post">
                             {% csrf_token %}
@@ -60,7 +58,7 @@
                             <button type="submit" name="submit">OK</button>
                         </form>
                     </p>
-
+                    <hr />
                     <p>Válassz egy felhasználót. Innentől az ő szemével látod a rendszert.</p>
                     <p>
                         <form action="" method="post">
@@ -75,11 +73,20 @@
                             <button type="submit" name="submit">OK</button>
                         </form>
                     </p>
-
+                    <hr />
+                    <p>
+                        A következő link szimulálja azt, hogy eltelt egy hónap, és megint fizetés nap van: a fizető kliensek befizetnek, és osztjuk a jutalékokat.
+                        <br>
+                        <a href="/graph_eval/next_month/">Következő hónap</a>
+                    </p>
+                    <p>Aktuális hónap: <b>{{actual_month}}</b></p>
                     <hr />
                     <p><b>Felhasználói menü</b><p>
                     <p>Te most ez a csávó vagy: <b>{{ actual_user.username }}</b></p>
                     <p>Szponzorom: <b>{{ actual_user.sponsor.username }}</b></p>
+                    <p>
+                        <b>Mátrixok: </b><a href="/graph_eval/binary_matrix/">bináris</a> | <a href="/graph_eval/unilevel_matrix/">unilevel</a>
+                    </p>
                     <p>
                         Pozícióim:<br />
          
@@ -88,32 +95,19 @@
                     <p><a href="/graph_eval/leave/{{ actual_user.id }}">Lelépek.</a> Ekkor minden szponzoráltamnak a Mester lesz a szponzora.</p>
                 </div>
                 <div class="span9">
-                    <h2>A mátrix</h2>
+                    <h2>{{tree_name}}:</h2>
                     <div class="row-fluid">
-                        <div class="span9" id="infovis_binary"></div>
+                        <div class="span9" id="infovis"></div>
                         <div id="log"></div>
                     </div>
-                    <hr />
-                    <div class="row-fluid">
-                        <div class="span9" id="infovis_unilevel"></div>
-                        <div id="log"></div>
-                    </div> 
                     {% if actual_user != None %}
-                        {% if actual_user.active_position != None %}
-                            <h4>{{ actual_user.active_position.name }} állapota</h4>
-                            <ul>
-                                <li>Fizetés állapota: <b>rendben</b></li>
-                                <li>Pénzem: {{ actual_user.money }}</li>
-                                <li>Mátrix állapota: {{ matrix_state }}</li>
-                            </ul>
-                        {% endif %}
+                        <h4>{{ actual_user.username }} Pénzügyi szituja:</h4>
+                        <ul>
+                            <li>Bináris cuccból: {{ actual_user.binary_money }}</li>
+                            <li>Unilevel cuccból: {{ actual_user.unilevel_money }}</li>
+                            <li>Összes manna: {{ actual_user.binary_money|add:actual_user.unilevel_money }}</li>
+                        </ul>
                     {% endif %}
-                    <hr />
-                    <h4>Mérleg</h4>
-                    <ul>
-                        <li>Eddig befizetett összegek: {{ amount_sum_in }}</li>
-                        <li>Eddigi jutalékok összesen: {{ amount_sum_out }}</li>
-                    </ul>
                 </div>
             </section>
 

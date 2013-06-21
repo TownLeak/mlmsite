@@ -38,7 +38,9 @@ def graph_eval(request):
         "actual_user": c.getActualUser(),
         "userSelectionForm": userSelectionForm,
         "sponsorSelectionForm": sponsorSelectionForm,
-        "tree_data": c.getActualTree()})
+        "tree_data": c.getActualTree(),
+        "actual_month": c.getActualMonth(),
+        "tree_name": c.getActualTreeName()})
 
 
 def graph_eval_more_users(request):
@@ -57,7 +59,25 @@ def graph_eval_gyalu(request):
 
 def graph_eval_leave(request, userid):
     c = Controller()
-    c.userLeaves(Controller.user_type.objects.get(id=userid))
+    c.userLeaves(User.objects.get(id=userid))
+    return HttpResponseRedirect('/graph_eval/')
+
+
+def graph_eval_binary_matrix(request):
+    c = Controller()
+    c.switchToBinaryMatrix()
+    return HttpResponseRedirect('/graph_eval/')
+
+
+def graph_eval_unilevel_matrix(request):
+    c = Controller()
+    c.switchToUnilevelMatrix()
+    return HttpResponseRedirect('/graph_eval/')
+
+
+def graph_eval_next_month(request):
+    c = Controller()
+    c.advanceToNextMonth()
     return HttpResponseRedirect('/graph_eval/')
 
 

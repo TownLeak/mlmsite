@@ -9,16 +9,15 @@ class UserModelChoiceField(forms.ModelChoiceField):
 
 
 class GraphEval_SponsorSelectionForm(forms.Form):
-    user = UserModelChoiceField(queryset=Controller.user_type.objects.filter(isActive=True))
+    sponsor = UserModelChoiceField(queryset=User.objects.filter(isActive=True))
 
     def save(self):
         c = Controller()
-        user = User.CreateNewUser(sponsor=self.cleaned_data['user'])
-        c.createNewBinaryPosition(user)
+        c.createNewUser(self.cleaned_data['sponsor'])
 
 
 class GraphEval_UserSelectionForm(forms.Form):
-    user = UserModelChoiceField(queryset=Controller.user_type.objects.filter(isActive=True))
+    user = UserModelChoiceField(queryset=User.objects.filter(isActive=True))
 
     def save(self):
         c = Controller()

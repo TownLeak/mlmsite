@@ -30,43 +30,9 @@ class BinaryTree:
     def _getNumberOfNodesToReturn(self, depth=_levelsOfFullMatrix):
         return self._sumOfSquares(depth)
 
-    def _getTreeOfRecursiveLogic(self, queue, listOfNodes, numToReturn):
-        # If the queue empty or the number of elements to retrieve is zero, terminate the logic
-        if not numToReturn:
-            return listOfNodes
-        # Get the actual root
-        if queue:
-            root = queue.popleft()
-        else:
-            root = None
-
-        if root:
-            queue.append(root.left)
-            queue.append(root.right)
-        else:
-            queue.append(None)
-            queue.append(None)
-
-        # Add the root (popped element) to the list
-        listOfNodes.append(root)
-        # Call recursively the logic with the new values
-        return self._getTreeOfRecursiveLogic(queue, listOfNodes, numToReturn - 1)
-
-    def getTreeOf(self, root, depth):
-        # root cannot be invalid
-        if not root:
-            raise BinaryTree.NodeIsEmpty
-        # Root is the first list element. Initialize the retrieval logic with it:
-        # Create empty queue, add the root
-        queue = deque([root])
-        # Calculate the number of retrieved nodes by the depth variable
-        numToReturn = self._getNumberOfNodesToReturn(depth)
-        # start the recursive retrieval logic.
-        return self._getTreeOfRecursiveLogic(queue, [], numToReturn)
-
     def placeNode(self, root, newNode):
         """Place a new node in the tree. A new node is a new product that is not yet in the tree.
-           The root is a product node that is the top of the actual (sub) tree - it is a sponsor product.
+           The root is a product node that is the parent of the actual (sub) tree - it is a sponsor product.
            This is a recursive function, where the root is always a new sub tree during the tree
            traversal. It will then fill the tree left-to-right, level-by-level."""
         # If root is empty, yield error
@@ -95,11 +61,11 @@ class BinaryTree:
         if not node:
             raise BinaryTree.NodeIsEmpty
         for i in range(self._levelsOfFullMatrix - 1):
-            # If actual node has no top, it means that we reached the top of the tree (master).
+            # If actual node has no parent, it means that we reached the parent of the tree (master).
             # In this case, master is the owner.
-            if not node.top:
+            if not node.parent:
                 return None
-            node = node.top
+            node = node.parent
 
         return node
 
@@ -118,7 +84,7 @@ class BinaryTree:
         else:
             raise BinaryTree.LogicError
 
-        newNode.top = node
+        newNode.parent = node
         node.save()
         newNode.save()
 

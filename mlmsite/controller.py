@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8
-from models import User, Position, State, MasterUser
+from models import User, State, MasterUser
 from binary_tree import BinaryTree
-#from unilevel_tree import UnilevelTree
+from django.utils.translation import ugettext as _
+from unilevel_tree import UnilevelTree
 
 
 class Controller:
@@ -10,11 +11,11 @@ class Controller:
         pass
 
     price = 100
+    monthly_fee = 100
     commission = 2 * price
-    user_type = User
-    state_type = State
-    position_type = Position
+    monthly_percent = 10
     conf_binary_matrix_display_depth = 3
+    conf_unilevel_copmmission_depth = 5
 
     def __init__(self):
         if not State.objects.all():
@@ -39,6 +40,9 @@ class Controller:
 
         return self._handleFullMatrix(user.active_binary_position) if isMatrixFull else user.active_binary_position
 
+    def createNewUnilevelPosition(self, user):
+        user.addNewActiveUnilevelPosition()
+
     def _handleFullMatrix(self, position):
         # Get the root of the full matrix
         logic = BinaryTree()
@@ -56,18 +60,18 @@ class Controller:
         state.save()
 
     def payCommission(self, user):
-        user.money += self.commission
+        user.binary_money += self.commission
         user.save()
         master = MasterUser.Get()
-        master.money -= self.commission
+        master.binary_money -= self.commission
         master.save()
 
     def payFee(self, user):
         # User buys the product, money decrerases
-        user.money -= self.price
+        user.binary_money -= self.price
         # It if bought from Master, so money increases
         master = MasterUser.Get()
-        master.money += self.price
+        master.binary_money += self.price
         master.save()
         user.save()
 
@@ -83,8 +87,55 @@ class Controller:
         if state.tree_view == State.BINARY_TREE:
             logic = BinaryTree()
             return logic.treeToJson(state.actual_user.active_binary_position)
-        #elif state.tree_view == State.UNILEVEL_TREE:
-#            logic = UnilevelTree()
-            #return logic.treeToJson(state.actual_user.active_unilevel_position)
+        elif state.tree_view == State.UNILEVEL_TREE:
+            logic = UnilevelTree()
+            return logic.treeToJson(state.actual_user.active_unilevel_position)
         else:
             raise Controller.UnknownTreeView
+
+    def _switchToMatrix(self, matrix):
+        state = self._getState()
+        state.tree_view = matrix
+        state.save()
+
+    def switchToBinaryMatrix(self):
+        self._switchToMatrix(State.BINARY_TREE)
+
+    def switchToUnilevelMatrix(self):
+        self._switchToMatrix(State.UNILEVEL_TREE)
+
+    def getActualTreeName(self):
+        return _(u"Binary matrix") if self._getState().tree_view == State.BINARY_TREE else "Unilevel matrix"
+
+    def advanceToNextMonth(self):
+        state = self._getState()
+        state.month += 1
+        state.save()
+        self.executeMonthlyPayments()
+
+    def getActualMonth(self):
+        return self._getState().month
+
+    def createNewUser(self, sponsor):
+        user = User.CreateNewUser(sponsor=sponsor)
+        self.createNewBinaryPosition(user)
+        self.createNewUnilevelPosition(user)
+        return user
+
+    def calculateMonthlyCommission(self):
+        return self.monthly_fee * self.monthly_percent / 100
+
+    def payMonthlyCommission(self, user):
+        commission = self.calculateMonthlyCommission() * user.active_unilevel_position.countChildren(self.conf_unilevel_copmmission_depth)
+        user.unilevel_money += commission
+        user.save()
+        return commission
+
+    def executeMonthlyPayments(self):
+        master = MasterUser.Get()
+        for user in User.objects.all():
+            if not user.isMaster():
+                user.unilevel_money -= self.monthly_fee
+                master.unilevel_money += (self.monthly_fee - self.payMonthlyCommission(user))
+
+        master.save()

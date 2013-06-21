@@ -1,14 +1,16 @@
-#from neo4django.db import models
 from django.db import models
 from binary_tree import BinaryTree
-#from mptt.models import MPTTModel, TreeForeignKey
+from mptt.models import MPTTModel, TreeForeignKey
 
 
-class Position(models.Model):
+class Position(MPTTModel):
+    class Meta:
+        abstract = True
+
     name = models.CharField(max_length=256)
     owner = models.ForeignKey('User')
-    #parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     closed = models.BooleanField(default=False)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
 
     def __str__(self):
         return self.name
@@ -16,16 +18,10 @@ class Position(models.Model):
     def get_full_name(self):
         return self.name
 
-    @classmethod
-    def CreateInDatabase(cls, owner):
-        name = "position%d" % len(cls.objects.all())
-        return cls.objects.create(name=name, owner=owner)
-
 
 class BinaryPosition(Position):
     left = models.ForeignKey('BinaryPosition', null=True, related_name='position_left')
     right = models.ForeignKey('BinaryPosition', null=True, related_name="position_right")
-    top = models.ForeignKey('BinaryPosition', null=True, related_name='position_sponsor')
 
     def placePosition(self, rootPosition):
         logic = BinaryTree()
@@ -33,13 +29,25 @@ class BinaryPosition(Position):
         return logic.isMatrixFull(logic.getMatrixTop(self))
 
 
+class UnilevelPosition(Position):
+    def countChildren(self, depth):
+        level = self.get_level()
+        count = 0
+        for child in self.get_descendants():
+            if child.get_level() - level <= depth:
+                count += 1
+
+        return count
+
+
 class User(models.Model):
     conf_username = "A Mester"
     username = models.CharField(max_length=64, unique=True)
     sponsor = models.ForeignKey('User', null=True, related_name='user_sponsor')
     active_binary_position = models.ForeignKey(BinaryPosition, null=True, related_name='user_binary_position')
-    #active_unilevel_position = models.ForeignKey('UnilevelPosition', null=True, related_name='user_unilevel_position')
-    money = models.IntegerField(default=0)
+    active_unilevel_position = models.ForeignKey('UnilevelPosition', null=True, related_name='user_unilevel_position')
+    binary_money = models.IntegerField(default=0)
+    unilevel_money = models.IntegerField(default=0)
     isActive = models.BooleanField(default=True)
 
     class MasterCannotLeave(Exception):
@@ -62,10 +70,16 @@ class User(models.Model):
         self.save()
 
     def addNewActiveBinaryPosition(self):
-        self.active_binary_position = BinaryPosition.CreateInDatabase(owner=self)
+        name = "binary_position%d" % len(BinaryPosition.objects.all())
+        self.active_binary_position = BinaryPosition.objects.create(name=name, owner=self)
         isMatrixFull = self.active_binary_position.placePosition(self.sponsor.active_binary_position) if not self.isMaster() else False
         self.save()
         return isMatrixFull
+
+    def addNewActiveUnilevelPosition(self):
+        name = "unilevel_position%d" % len(UnilevelPosition.objects.all())
+        self.active_unilevel_position = UnilevelPosition.objects.create(name=name, owner=self, parent=self.sponsor.active_unilevel_position if self.sponsor else None)
+        self.save()
 
     def isMaster(self):
         return self.username == User.conf_username
@@ -84,23 +98,28 @@ class MasterUser(User):
             master = User.objects.get(username=MasterUser.conf_username)
         except User.DoesNotExist:
             master = User.objects.create(username=MasterUser.conf_username)
-            master.active_binary_position = BinaryPosition.CreateInDatabase(owner=master)
+            master.addNewActiveBinaryPosition()
+            master.addNewActiveUnilevelPosition()
             master.sponsor = master
             master.save()
         return master
 
 
 class State(models.Model):
+    actual_user = models.ForeignKey(User)
+    month = models.IntegerField(default=0)
+
     BINARY_TREE = 'B'
     UNILEVEL_TREE = 'U'
-    actual_user = models.ForeignKey(User)
+
     tree_view = models.CharField(max_length=1, choices=(
         (BINARY_TREE, "Binary"),
         (UNILEVEL_TREE, "Unilevel")),
         default=BINARY_TREE
     )
 
+    def __str__(self):
+        return "Actual user: %s ; tree: %s" % (self.actual_user.username, self.tree_view)
 
-# class UnilevelPosition(MPTTModel):
-#     name = models.CharField(max_length=256)
-#     owner = models.ForeignKey(User)
+    def get_full_name(self):
+        return self.__str__()
