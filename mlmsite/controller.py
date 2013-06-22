@@ -4,13 +4,14 @@ from models import User, State, MasterUser
 from binary_tree import BinaryTree
 from django.utils.translation import ugettext as _
 from unilevel_tree import UnilevelTree
+from collections import deque
 
 
 class Controller:
     class UnknownTreeView(Exception):
         pass
 
-    price = 100
+    price = 1000
     monthly_fee = 100
     commission = 2 * price
     monthly_percent = 10
@@ -139,3 +140,15 @@ class Controller:
                 master.unilevel_money += (self.monthly_fee - self.payMonthlyCommission(user))
 
         master.save()
+
+    def _createMoreNewUsersRecursive(self, queue, callNum, limit):
+        sponsor = queue.popleft()
+        for i in range(2):
+            queue.append(self.createNewUser(sponsor=sponsor))
+            if (callNum + i + 1) == limit:
+                return
+
+        self._createMoreNewUsersRecursive(queue, callNum + 2, limit)
+
+    def createMoreNewUsers(self, limit):
+        self._createMoreNewUsersRecursive(deque([MasterUser.Get()]), 0, limit)
