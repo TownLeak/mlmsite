@@ -40,10 +40,6 @@
                 <div class="span3">
                     <p><b>Szimulációs menü</p></b>
                     <hr />
-                    <p><a href="/graph_eval/gyalu/">GYALU</a>. Klikkelj erre, és reszeltek az adatbázisnak, kezded a nulláról.</p>
-                    <hr />
-                    <p><a href="/graph_eval/more_users/">Csinálj 6 usert azonnal a mester alá</a></p>
-                    <hr />
                     <p>Új felhasználó csinálása. Nem kell kitölteni adatokat, csinál neked egy új kamu "felhasználót" azonnal. Válassz szponzort, OK-ra csinálja a felhasználót. Ez leszimulál egy sikeres vásárlást is, tehát az új felhasználó befizetett, stb. A játék kedvéért, a kliens befizet a havidíjas cucckerájra is, szóval megjelenik minden mátrixban.</p>
                     <p>
                         <form action="" method="post">
@@ -91,8 +87,6 @@
                         Pozícióim:<br />
          
                     </p>
-                    <hr />
-                    <p><a href="/graph_eval/leave/{{ actual_user.id }}">Lelépek.</a> Ekkor minden szponzoráltamnak a Mester lesz a szponzora.</p>
                 </div>
                 <div class="span9">
                     <h2>{{tree_name}}:</h2>
@@ -103,11 +97,22 @@
                     {% if actual_user != None %}
                         <h4>{{ actual_user.username }} Pénzügyi szituja:</h4>
                         <ul>
-                            <li>Bináris cuccból: {{ actual_user.binary_money }}</li>
-                            <li>Unilevel cuccból: {{ actual_user.unilevel_money }}</li>
+                            <li>Bináris cuccból: {{ actual_user.binary_money }} (egységár: {{controller.price }})</li>
+                            <li>Unilevel cuccból: {{ actual_user.unilevel_money }} (egységár: {{ controller.monthly_fee }})</li>
                             <li>Összes manna: {{ actual_user.binary_money|add:actual_user.unilevel_money }}</li>
                         </ul>
+                        <hr>
                     {% endif %}
+                    <div class="row-fluid">
+                        <div class="span3">
+                            <p><a href="/graph_eval/gyalu/">GYALU</a>. Klikkelj erre, és reszeltek az adatbázisnak, kezded a nulláról.</p>
+                            <p><a href="/graph_eval/more_users/">Csinálj 6 usert azonnal a mester alá</a></p>
+                            <p><a href="/graph_eval/thousand_users/">Csinálj 1000 usert azonnal.</a> Mindenki behoz 2 fickót, ez olyan. A Mesternél kezdi.</p>
+                        </div>
+                        <div class="span3">
+                            <p><a href="/graph_eval/leave/{{ actual_user.id }}">Lelépek.</a> Ekkor minden szponzoráltamnak a Mester lesz a szponzora.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 

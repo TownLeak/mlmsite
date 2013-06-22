@@ -40,7 +40,8 @@ def graph_eval(request):
         "sponsorSelectionForm": sponsorSelectionForm,
         "tree_data": c.getActualTree(),
         "actual_month": c.getActualMonth(),
-        "tree_name": c.getActualTreeName()})
+        "tree_name": c.getActualTreeName(),
+        "controller": c})
 
 
 def graph_eval_more_users(request):
@@ -50,6 +51,10 @@ def graph_eval_more_users(request):
         c.createNewBinaryPosition(user)
     return HttpResponseRedirect('/graph_eval/')
 
+def graph_eval_thousand_users(request):
+    c = Controller()
+    c.createMoreNewUsers(1000)
+    return HttpResponseRedirect('/graph_eval/')
 
 def graph_eval_gyalu(request):
     call_command('flush', interactive=False, verbosity=1)
