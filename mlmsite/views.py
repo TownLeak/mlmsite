@@ -51,10 +51,12 @@ def graph_eval_more_users(request):
         c.createNewBinaryPosition(user)
     return HttpResponseRedirect('/graph_eval/')
 
+
 def graph_eval_thousand_users(request):
     c = Controller()
     c.createMoreNewUsers(1000)
     return HttpResponseRedirect('/graph_eval/')
+
 
 def graph_eval_gyalu(request):
     call_command('flush', interactive=False, verbosity=1)
@@ -88,3 +90,40 @@ def graph_eval_next_month(request):
 
 def bootstrap(request):
     return render(request, "base_bootstrap_tutorial.html", {})
+
+from paypal.pro.views import PayPalPro
+from paypal.standard.forms import PayPalPaymentsForm
+from django.conf import settings
+from django.core.urlresolvers import reverse
+
+def try_paypal_success(request):
+    return render(request, "try_paypal_success.html", {})
+
+import sys
+from django.db.models.signals import *
+from datetime import datetime
+
+
+def try_paypal(request):
+    for signal in [pre_save, pre_init, pre_delete, post_save, post_delete, post_init, post_syncdb]:
+    # print a List of connected listeners
+        print >>sys.stderr, signal.receivers
+    print >>sys.stderr, "%s%s" % (settings.SITE_NAME, "atyalapatyala")
+    paypal_dict = {"business": settings.PAYPAL_RECEIVER_EMAIL,
+        "amount": "1.00",             # amount to charge for item
+        "invoice": datetime.now(),       # unique tracking variable paypal
+        "item_name": "Cipő",
+        "notify_url": "%s%s" % (settings.SITE_NAME, "atyalapatyala"),
+        "cancel_return": "%s/try_paypal_cancel" % settings.SITE_NAME,  # Express checkout cancel url
+        "return_url": "%s/try_paypal_success" % settings.SITE_NAME}  # Express checkout return url
+
+    # kw = {"item": item,                            # what you're selling
+    #     "payment_template": "try_paypal.html",      # template name for payment
+    #     "confirm_template": "try_paypal_confirmation.html",  # template name for confirmation
+    #     "success_url": "/try_paypal_success/"}              # redirect location after success
+
+    #ppp = PayPalPro(**kw)
+    #return ppp(request)
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    context = {"form": form.sandbox()}
+    return render(request, "try_paypal.html", context)

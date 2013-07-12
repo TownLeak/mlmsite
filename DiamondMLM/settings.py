@@ -15,6 +15,8 @@ ADMINS = (
     ('Zsolt Molnar', 'zsolt@zsoltmolnar.hu'),
 )
 
+SITE_NAME = "http://molnarzs.selfip.com:8000"
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -47,6 +49,7 @@ LANGUAGES = (
 )
 
 SITE_ID = 1
+
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -133,6 +136,11 @@ INSTALLED_APPS = (
     'django_countries',
     'south',
     'mptt',
+    'paypal.standard.ipn',
+    'paypal.standard',
+    'paypal.pro',
+    'lettuce.django',
+    'nose'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -217,3 +225,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 #EMAIL_PORT = 587
 #EMAIL_HOST_USER = 'mol.zsolt@gmail.com'
 #EMAIL_HOST_PASSWORD = 'Bart12*Hrve'
+
+PAYPAL_RECEIVER_EMAIL = "zsolt-facilitator@zsoltmolnar.hu"
+PAYPAL_TEST = True           # Testing mode on
+PAYPAL_WPP_USER = "zsolt-facilitator_api1.zsoltmolnar."      # Get from PayPal
+PAYPAL_WPP_PASSWORD = "1372431944"
+PAYPAL_WPP_SIGNATURE = "Axuqo-pd7md209VQEMFEnzXeNLuIAhvcWGulxZ3qXrt6B24idj64z4l-"

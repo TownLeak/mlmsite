@@ -26,4 +26,11 @@ urlpatterns += patterns('mlmsite.views',
     url(r'^graph_eval/leave/(\d)$', 'graph_eval_leave'),
     url(r'^graph_eval/next_month/$', 'graph_eval_next_month'),
     url(r'^bootstrap/$', 'bootstrap'),
+    url(r'^try_paypal/$', 'try_paypal'),
+    url(r'^try_paypal_success/$', 'try_paypal_success'),
+    url(r'^try_paypal_cancel/$', 'try_paypal_cancel'),
+)
+
+urlpatterns += patterns('paypal.standard.ipn.views',
+    (r'^atyalapatyala/', 'ipn'),
 )
