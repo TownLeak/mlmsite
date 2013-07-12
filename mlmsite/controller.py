@@ -119,9 +119,10 @@ class Controller:
 
     def createNewUser(self, sponsor):
         user = User.CreateNewUser(sponsor=sponsor)
+        id = user.id
         self.createNewBinaryPosition(user)
         self.createNewUnilevelPosition(user)
-        return user
+        return User.objects.get(id=id)
 
     def calculateMonthlyCommission(self):
         return self.monthly_fee * self.monthly_percent / 100
