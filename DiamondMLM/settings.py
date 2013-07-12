@@ -7,6 +7,7 @@ from settings_actual import Settings
 # Django settings for DiamondMLM project.
 
 APP_ROOT = Settings["root"]
+SITE_NAME = Settings["site_name"]
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -15,7 +16,6 @@ ADMINS = (
     ('Zsolt Molnar', 'zsolt@zsoltmolnar.hu'),
 )
 
-SITE_NAME = "http://molnarzs.selfip.com:8000"
 
 MANAGERS = ADMINS
 
