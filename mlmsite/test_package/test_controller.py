@@ -154,6 +154,12 @@ class Tests(TestCase):
         tree.treeToJson(user1.active_unilevel_position)
         tree.treeToJson(user2.active_unilevel_position)
 
+    def testCreateNewUser_persistency(self):
+        c = Controller()
+        master = MasterUser.Get()
+        user1 = c.createNewUser(master)
+        self.assertTrue(user1.active_unilevel_position)
+
     def testCalculateMonthlyCommission(self):
         c = Controller()
         self.assertEqual(c.monthly_fee, 100)
