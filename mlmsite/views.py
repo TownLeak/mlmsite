@@ -96,8 +96,13 @@ from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
+def try_paypal_cancel(request):
+    return render(request, "try_paypal_cancel.html", {})
+
+
 def try_paypal_success(request):
     return render(request, "try_paypal_success.html", {})
+
 
 import sys
 from django.db.models.signals import *
