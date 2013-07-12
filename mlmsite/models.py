@@ -123,3 +123,19 @@ class State(models.Model):
 
     def get_full_name(self):
         return self.__str__()
+
+
+from paypal.standard.ipn.signals import payment_was_successful
+import sys
+from django.dispatch import receiver
+
+
+def show_me_the_money(sender, **kwargs):
+    print >>sys.stderr, 'Goodbye, cruel world!'
+    #ipn_obj = sender
+    # Undertake some action depending upon `ipn_obj`.
+    #if ipn_obj.custom == "Upgrade all users!":
+        #pass
+        #Users.objects.update(paid=True)
+
+payment_was_successful.connect(show_me_the_money)
