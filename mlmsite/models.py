@@ -90,6 +90,14 @@ class User(models.Model):
             raise User.SponsorMustBeDefined
         return User.objects.create(username="user%d" % len(User.objects.all()), sponsor=sponsor)
 
+    @classmethod
+    def IdOfFirstOrdinaryUser(cls):
+        return 2
+
+    @classmethod
+    def Get(cls, id):
+        return cls.objects.get(id=id)
+
 
 class MasterUser(User):
     @classmethod

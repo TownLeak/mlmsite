@@ -45,16 +45,15 @@ def graph_eval(request):
 
 
 def graph_eval_more_users(request):
-    c = Controller()
     for i in range(6):
         user = User.CreateNewUser(sponsor=MasterUser.Get())
-        c.createNewBinaryPosition(user)
+        Controller().createNewBinaryPosition(user)
+        Controller().createNewUnilevelPosition(user)
     return HttpResponseRedirect('/graph_eval/')
 
 
 def graph_eval_thousand_users(request):
-    c = Controller()
-    c.createMoreNewUsers(1000)
+    Controller().createMoreNewUsers(1000)
     return HttpResponseRedirect('/graph_eval/')
 
 

@@ -33,72 +33,89 @@ class Tests(TestCase):
         self.assertEqual(state, State.objects.get(id=1))
 
     def testCreateNewBinaryPositionForUser(self):
-        c = Controller()
-        master = User.objects.get(id=1)
-        user = User.objects.create(username="User", sponsor=master)
+        userId = User.objects.create(username="User", sponsor=MasterUser.Get()).id
         self.assertEqual(1, len(BinaryPosition.objects.all()))
-        self.assertFalse(user.active_binary_position)
-        newPosition = c.createNewBinaryPosition(user)
+        self.assertFalse(User.Get(userId).active_binary_position)
+        newPosition = Controller().createNewBinaryPosition(userId)
         self.assertTrue(newPosition)
-        self.assertEqual(newPosition, user.active_binary_position)
+        self.assertEqual(newPosition, User.Get(userId).active_binary_position)
         self.assertEqual(2, len(BinaryPosition.objects.all()))
-        self.assertEqual(master.active_binary_position.left, newPosition)
-        self.assertEqual(newPosition.parent, master.active_binary_position)
+        self.assertEqual(MasterUser.Get().active_binary_position.left, newPosition)
+        self.assertEqual(newPosition.parent, MasterUser.Get().active_binary_position)
 
-    def _createBinaryPositions(self, numberOfPositions, sponsor):
-        c = Controller()
+    def _createBinaryPositions(self, numberOfPositions, sponsorId):
         for i in range(0, numberOfPositions):
-            user = User.objects.create(username=("User%d" % i), sponsor=sponsor)
-            self.assertTrue(sponsor.active_binary_position)
-            c.createNewBinaryPosition(user)
+            user = User.objects.create(username=("User%d" % i), sponsor=User.Get(sponsorId))
+            self.assertTrue(User.Get(sponsorId).active_binary_position)
+            Controller().createNewBinaryPosition(user.id)
 
     def testHandleFullMatrixOfMaster(self):
-        c = Controller()
-        master = MasterUser.Get()
-        logic = BinaryTree()
-        numberOfUsers = logic._getNumberOfNodesToReturn() - 2
-        self._createBinaryPositions(numberOfUsers, master)
-        master = MasterUser.Get()
-        self.assertEqual(numberOfUsers * c.price, master.binary_money)
-        user = User.objects.create(username="Last User", sponsor=master)
-        c.createNewBinaryPosition(user)
+        numberOfUsers = BinaryTree()._getNumberOfNodesToReturn() - 2
+        self._createBinaryPositions(numberOfUsers, MasterUser.Get().id)
+        self.assertEqual(numberOfUsers * Controller().price, MasterUser.Get().binary_money)
+        user = User.objects.create(username="Last User", sponsor=MasterUser.Get())
+        Controller().createNewBinaryPosition(user.id)
         # With this move, the master's matrix got full. Master should not get commission,
         # only the fees.
-        master = MasterUser.Get()
-        self.assertEqual((numberOfUsers + 1) * c.price, master.binary_money)
+        self.assertEqual((numberOfUsers + 1) * Controller().price, MasterUser.Get().binary_money)
         # Check if the new position for the master has been created.
         # It must be a completely new matrix.
-        self.assertEqual(master.active_binary_position.parent, None)
+        self.assertEqual(MasterUser.Get().active_binary_position.parent, None)
 
     def testHandleFullMatrixOfUser(self):
-        c = Controller()
-        master = MasterUser.Get()
-        activeId = master.active_binary_position.id
-        self.assertTrue(master.active_binary_position)
-        self.assertEqual(master.id, 1)
-        parentUser = User.objects.create(username="First User", sponsor=master)
-        c.createNewBinaryPosition(parentUser)
-        self.assertTrue(parentUser.active_binary_position)
-        logic = BinaryTree()
-        numberOfUsers = logic._getNumberOfNodesToReturn() - 2
-        self._createBinaryPositions(numberOfUsers, parentUser)
-        self.assertEqual(- c.price, parentUser.binary_money)
-        last_user = User.objects.create(username="Last User", sponsor=parentUser)
-        self.assertEqual(activeId, master.active_binary_position.id)
-        self.assertEqual(last_user.sponsor.id, parentUser.id)
-        c.createNewBinaryPosition(last_user)
-        self.assertEqual(last_user.sponsor.id, parentUser.id)
-        self.assertEqual(activeId, master.active_binary_position.id)
-        master = MasterUser.Get()
-        self.assertEqual((numberOfUsers + 2) * c.price - c.commission, master.binary_money)
-        # With this move, the master's matrix got full. Sponsor should get commission, no new fee
+        activeId = MasterUser.Get().active_binary_position.id
+        self.assertTrue(MasterUser.Get().active_binary_position)
+        self.assertEqual(MasterUser.Get().id, 1)
+        parentUserId = User.objects.create(username="First User", sponsor=MasterUser.Get()).id
+        Controller().createNewBinaryPosition(parentUserId)
+        self.assertTrue(User.Get(parentUserId).active_binary_position)
+        numberOfUsers = BinaryTree()._getNumberOfNodesToReturn() - 2
+        self._createBinaryPositions(numberOfUsers, parentUserId)
+        self.assertEqual(- Controller().price, User.Get(parentUserId).binary_money)
+        lastUserId = User.objects.create(username="Last User", sponsor=User.Get(parentUserId)).id
+        self.assertEqual(activeId, MasterUser.Get().active_binary_position.id)
+        self.assertEqual(User.Get(lastUserId).sponsor.id, parentUserId)
+        Controller().createNewBinaryPosition(lastUserId)
+        self.assertEqual(User.Get(lastUserId).sponsor.id, parentUserId)
+        self.assertEqual(activeId, MasterUser.Get().active_binary_position.id)
+        self.assertEqual((numberOfUsers + 2) * Controller().price - Controller().commission, MasterUser.Get().binary_money)
+        # With this move, the parent's matrix got full. Sponsor should get commission, no new fee
         # should be paid after the repositioning.
-        self.assertEqual(c.commission - c.price, parentUser.binary_money)
+        # This line has been failed. Test0002 was used for debugging.
+        self.assertEqual(- Controller().price + Controller().commission, User.Get(parentUserId).binary_money)
         # Check if the new position for the master has been created.
         # It must be the rightmost node at one level below the full matrix.
-        self.assertEqual(parentUser.active_binary_position.parent.owner.id, master.id)
-        self.assertTrue(master.active_binary_position.right)
-        self.assertEqual(master.active_binary_position.right.id, parentUser.active_binary_position.id)
+        self.assertEqual(User.Get(parentUserId).active_binary_position.parent.owner.id, MasterUser.Get().id)
+        self.assertTrue(MasterUser.Get().active_binary_position.right)
+        self.assertEqual(MasterUser.Get().active_binary_position.right.id, User.Get(parentUserId).active_binary_position.id)
+
+    def testTest0002(self):
+        """It turned out that binary comission was not paid for user when a binary matrix got full.
+           in testHandleFullMatrixOfUser. In this test, we go to the failure point and execute the test
+           function line-by-line."""
+        parentUserId = User.objects.create(username="First User", sponsor=MasterUser.Get()).id
+        Controller().createNewBinaryPosition(parentUserId)
+        numberOfUsers = BinaryTree()._getNumberOfNodesToReturn() - 2
+        self._createBinaryPositions(numberOfUsers, parentUserId)
+        lastUserId = User.objects.create(username="Last User", sponsor=User.Get(parentUserId)).id
+        # This was the failed line:
+        # Controller().createNewBinaryPosition(lastUserId)
+        self.assertTrue(User.Get(lastUserId).addNewActiveBinaryPosition())
+        # Check situation before payment
+        self.assertEqual(- Controller().price, User.Get(parentUserId).binary_money)
+        Controller().payBinaryPrice(lastUserId)
+        self.assertEqual(- Controller().price, User.Get(parentUserId).binary_money)
+        # This line did noy pay commision for parent user. Extend it, check line-by-line
+        # Controller()._handleFullMatrix(User.Get(lastUserId).active_binary_position)
+        position = User.Get(lastUserId).active_binary_position
+        top = BinaryTree().getMatrixTop(position)
+        self.assertTrue(not top.owner.isMaster())
+        if not top.owner.isMaster():
+            Controller().payBinaryCommission(top.owner.id)
+        # OK, this was the error. payBinaryCommission was called, saved the new money state,
+        # but this line re-saved the old state.
+        # top.owner.save()
+        self.assertEqual(- Controller().price + Controller().commission, User.Get(parentUserId).binary_money)
 
     def testSetActualUser(self):
         c = Controller()
@@ -107,58 +124,46 @@ class Tests(TestCase):
         c.setActualUser(newUser)
         self.assertEqual(newUser, c.getActualUser())
 
-    def testPayFee(self):
-        c = Controller()
-        master = MasterUser.Get()
-        user = User.objects.create(username="Last User", sponsor=master)
-        self.assertEqual(0, user.binary_money)
-        self.assertEqual(0, master.binary_money)
-        c.payFee(user)
-        self.assertEqual(-c.price, user.binary_money)
-        master = MasterUser.Get()
-        self.assertEqual(c.price, master.binary_money)
+    def testPayBinaryPrice(self):
+        userId = User.objects.create(username="Last User", sponsor=MasterUser.Get()).id
+        self.assertEqual(0, User.Get(userId).binary_money)
+        self.assertEqual(0, MasterUser.Get().binary_money)
+        Controller().payBinaryPrice(userId)
+        self.assertEqual(-Controller().price, User.Get(userId).binary_money)
+        self.assertEqual(Controller().price, MasterUser.Get().binary_money)
 
-    def testPayCommission(self):
-        c = Controller()
-        master = MasterUser.Get()
-        user = User.objects.create(username="Last User", sponsor=master)
-        self.assertEqual(0, user.binary_money)
-        c.payCommission(user)
-        master = MasterUser.Get()
-        self.assertEqual(c.commission, user.binary_money)
-        self.assertEqual(-c.commission, master.binary_money)
+    def testPayBinaryCommission(self):
+        userId = User.objects.create(username="Last User", sponsor=MasterUser.Get()).id
+        self.assertEqual(0, User.Get(userId).binary_money)
+        Controller().payBinaryCommission(userId)
+        self.assertEqual(Controller().commission, User.Get(userId).binary_money)
+        self.assertEqual(-Controller().commission, MasterUser.Get().binary_money)
 
     def testUserLeaves_MasterCannotLeave(self):
         c = Controller()
-        master = MasterUser.Get()
         with self.assertRaises(MasterUser.MasterCannotLeave):
-            c.userLeaves(master)
-        user1 = User.objects.create(username="user1", sponsor=master)
-        user2 = User.objects.create(username="user2", sponsor=user1)
-        self.assertEqual(user2.sponsor.id, user1.id)
-        id = user2.id
-        self.assertTrue(user1.isActive)
-        c.userLeaves(user1)
-        self.assertFalse(user1.isActive)
-        user2 = User.objects.get(id=id)
-        self.assertEqual(user2.sponsor.id, master.id)
+            c.userLeaves(MasterUser.Get().id)
+        user1Id = User.objects.create(username="user1", sponsor=MasterUser.Get()).id
+        user2Id = User.objects.create(username="user2", sponsor=User.Get(user1Id)).id
+        self.assertEqual(User.Get(user2Id).sponsor.id, user1Id)
+        self.assertTrue(User.Get(user1Id).isActive)
+        c.userLeaves(user1Id)
+        self.assertFalse(User.Get(user1Id).isActive)
+        self.assertEqual(User.Get(user2Id).sponsor.id, MasterUser.Get().id)
 
     def testCreateNewUser(self):
         c = Controller()
         c._getState().tree_view = State.UNILEVEL_TREE
         master = MasterUser.Get()
-        user1 = c.createNewUser(master)
+        user1Id = c.createNewUser(master)
         tree = UnilevelTree()
-        tree.treeToJson(user1.active_unilevel_position)
-        user2 = c.createNewUser(user1)
-        tree.treeToJson(user1.active_unilevel_position)
-        tree.treeToJson(user2.active_unilevel_position)
+        tree.treeToJson(User.Get(user1Id).active_unilevel_position)
+        user2Id = c.createNewUser(User.Get(user1Id))
+        tree.treeToJson(User.Get(user1Id).active_unilevel_position)
+        tree.treeToJson(User.Get(user2Id).active_unilevel_position)
 
     def testCreateNewUser_persistency(self):
-        c = Controller()
-        master = MasterUser.Get()
-        user1 = c.createNewUser(master)
-        self.assertTrue(user1.active_unilevel_position)
+        self.assertTrue(User.Get(Controller().createNewUser(MasterUser.Get())).active_unilevel_position)
 
     def testCalculateMonthlyCommission(self):
         c = Controller()
@@ -167,18 +172,17 @@ class Tests(TestCase):
         self.assertEqual(c.calculateMonthlyCommission(), 10)
 
     def testPayMonthlyCommission(self):
-        c = Controller()
-        user = User.objects.create(username="User")
-        user.addNewActiveUnilevelPosition()
-        position_1_1 = UnilevelPosition.objects.create(owner=user, parent=user.active_unilevel_position)
+        userId = User.objects.create(username="User").id
+        User.Get(userId).addNewActiveUnilevelPosition()
+        position_1_1 = UnilevelPosition.objects.create(owner=User.Get(userId), parent=User.Get(userId).active_unilevel_position)
         position_1_1.save()
-        self.assertEqual(user.unilevel_money, 0)
-        c.payMonthlyCommission(user)
-        self.assertEqual(user.unilevel_money, 10)
-        position_1_2 = UnilevelPosition.objects.create(owner=user, parent=user.active_unilevel_position)
+        self.assertEqual(User.Get(userId).unilevel_money, 0)
+        Controller().payMonthlyCommission(userId)
+        self.assertEqual(User.Get(userId).unilevel_money, 10)
+        position_1_2 = UnilevelPosition.objects.create(owner=User.Get(userId), parent=User.Get(userId).active_unilevel_position)
         position_1_2.save()
-        c.payMonthlyCommission(user)
-        self.assertEqual(user.unilevel_money, 30)
+        Controller().payMonthlyCommission(userId)
+        self.assertEqual(User.Get(userId).unilevel_money, 30)
 
     def testExecuteMonthlyPayments_MasterReceivesNoPayment(self):
         master = MasterUser.Get()
@@ -194,10 +198,9 @@ class Tests(TestCase):
 
     def testExecuteMonthlyPayments_UserReceivesPayment(self):
         master = MasterUser.Get()
-        c = Controller()
         user1 = self._createInvitedUser(sponsor=master)
         id1 = user1.id
-        c.executeMonthlyPayments()
+        Controller().executeMonthlyPayments()
         user1 = User.objects.get(id=id1)
         master = MasterUser.Get()
         self.assertEqual(100, master.unilevel_money)
@@ -206,7 +209,7 @@ class Tests(TestCase):
         id2 = user2.id
         self.assertEqual(0, user2.binary_money)
         self.assertEqual(0, user2.unilevel_money)
-        c.executeMonthlyPayments()
+        Controller().executeMonthlyPayments()
         user1 = User.objects.get(id=id1)
         user2 = User.objects.get(id=id2)
         master = MasterUser.Get()
@@ -216,6 +219,79 @@ class Tests(TestCase):
         self.assertEqual(-190, user1.unilevel_money)
         self.assertEqual(0, user2.binary_money)
         self.assertEqual(-100, user2.unilevel_money)
+
+    def _getFirstOrdinaryUser(self):
+        return User.objects.get(id=User.IdOfFirstOrdinaryUser())
+
+    def testOneFullMatrix(self):
+        self.assertEqual(BinaryTree._levelsOfFullMatrix, 3)
+
+        # Create six users: master's first matrix runs out
+        for i in range(6):
+            Controller().createNewUser(MasterUser.Get())
+
+        self.assertFalse(MasterUser.Get().active_binary_position.left)
+        self.assertEqual(6 * Controller.price, MasterUser.Get().binary_money)
+
+        # Create four users: user1's first matrix is over
+        for i in range(4):
+            Controller().createNewUser(self._getFirstOrdinaryUser())
+
+        self.assertFalse(self._getFirstOrdinaryUser().active_binary_position.left)
+        self.assertEqual(self._getFirstOrdinaryUser().active_binary_position.parent.owner.id, MasterUser.Get().id)
+        # This line did not pass. A separate test had been done, test id: Test0001
+        # Problem was: we did not use MasterUser.Get(), to get the actual master object, so
+        # master variable reflected an earlier state.
+        self.assertTrue(MasterUser.Get().active_binary_position.left)
+        self.assertTrue(self._getFirstOrdinaryUser().active_binary_position.parent)
+        self.assertEqual(MasterUser.Get().active_binary_position.left.id, self._getFirstOrdinaryUser().active_binary_position.id)
+
+    def testTestId0001(self):
+        """Assuming matrix depth 3, we create 6 users for master, then 4 for user1. The following must be true:
+           - Master matrix runs out
+           - at the last creation, user1 must run out
+           - User 1's new position is the left child of master's actual position
+           - Commissions has been played properly"""
+        self.assertEqual(BinaryTree._levelsOfFullMatrix, 3)
+        oldMasterPositionId = MasterUser.Get().active_binary_position.id
+        # Create six users for master - master runs out (not checked)
+        for i in range(6):
+            Controller().createNewUser(MasterUser.Get())
+        # Create three users: user1's first matrix is not yet over. Test if all the conditions are OK here,
+        # before we create another user sponsored by user1 (so that user1 runs out)
+        for i in range(3):
+            Controller().createNewUser(self._getFirstOrdinaryUser())
+
+        self.assertEqual(-Controller().price, self._getFirstOrdinaryUser().binary_money)
+        self.assertEqual(9 * Controller().price, MasterUser.Get().binary_money)
+        self.assertEqual(self._getFirstOrdinaryUser().active_binary_position.parent.id, oldMasterPositionId)
+        newMasterPositionId = MasterUser.Get().active_binary_position.id
+        self.assertNotEqual(newMasterPositionId, oldMasterPositionId)
+        self.assertFalse(MasterUser.Get().active_binary_position.left)
+        self.assertFalse(MasterUser.Get().active_binary_position.right)
+
+        # Now, create another user, sponsorred by user1. User1 must run out.
+        oldUser1PositionId = self._getFirstOrdinaryUser().active_binary_position.id
+        Controller().createNewUser(self._getFirstOrdinaryUser())
+        newUser1PositionId = self._getFirstOrdinaryUser().active_binary_position.id
+        self.assertNotEqual(newUser1PositionId, oldUser1PositionId)
+        self.assertTrue(MasterUser.Get().active_binary_position.left)
+        self.assertEqual(MasterUser.Get().active_binary_position.left.id, newUser1PositionId)
+        # Here, commission should be paid for user1, that is 2 * the price. Som master's mani is less...
+        self.assertEqual(MasterUser.Get().binary_money, (10 - 2) * Controller().price)
+        self.assertEqual(self._getFirstOrdinaryUser().binary_money, Controller().price)
+
+    def testCreateMoreNewUsers_2(self):
+        self.assertEqual(BinaryTree._levelsOfFullMatrix, 3)
+        Controller().createMoreNewUsers(2)
+        self.assertEqual(MasterUser.Get().active_binary_position.left.id, 2)
+        self.assertEqual(MasterUser.Get().active_binary_position.right.id, 3)
+
+    def testCreateMoreNewUsers_6(self):
+        self.assertEqual(BinaryTree._levelsOfFullMatrix, 3)
+        Controller().createMoreNewUsers(6)
+        self.assertFalse(MasterUser.Get().active_binary_position.left)
+        self.assertFalse(MasterUser.Get().active_binary_position.right)
 
 
 # -----------------------------------------------------------------------------

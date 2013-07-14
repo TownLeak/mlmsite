@@ -33,41 +33,41 @@ class Controller:
         logic = BinaryTree()
         return logic.getTreeOf(state.actual_user.active_binary_position, self.conf_binary_matrix_display_depth)
 
-    def createNewBinaryPosition(self, user, paid=True):
-        isMatrixFull = user.addNewActiveBinaryPosition()
+    def createNewBinaryPosition(self, userId, toPayPrice=True):
+        isMatrixFull = User.Get(userId).addNewActiveBinaryPosition()
 
-        if paid:
-            self.payFee(user)
+        if toPayPrice:
+            self.payBinaryPrice(userId)
 
-        return self._handleFullMatrix(user.active_binary_position) if isMatrixFull else user.active_binary_position
+        return self._handleFullMatrix(User.Get(userId).active_binary_position) if isMatrixFull else User.Get(userId).active_binary_position
 
-    def createNewUnilevelPosition(self, user):
-        user.addNewActiveUnilevelPosition()
+    def createNewUnilevelPosition(self, userId):
+        User.Get(userId).addNewActiveUnilevelPosition()
 
     def _handleFullMatrix(self, position):
         # Get the root of the full matrix
-        logic = BinaryTree()
-        top = logic.getMatrixTop(position)
+        top = BinaryTree().getMatrixTop(position)
         # Pay commission to it, except for the master.
         if not top.owner.isMaster():
-            self.payCommission(top.owner)
+            self.payBinaryCommission(top.owner.id)
         # Place the root again, to its sponsor's matrix.
-        top.owner.save()
-        return self.createNewBinaryPosition(top.owner, False)
+        return self.createNewBinaryPosition(top.owner.id, toPayPrice=False)
 
     def setActualUser(self, user):
         state = self._getState()
         state.actual_user = user
         state.save()
 
-    def payCommission(self, user):
+    def payBinaryCommission(self, userId):
+        user = User.Get(userId)
         user.binary_money += self.commission
         user.save()
         master = MasterUser.Get()
         master.binary_money -= self.commission
         master.save()
 
-    def payFee(self, user):
+    def payBinaryPrice(self, userId):
+        user = User.Get(userId)
         # User buys the product, money decrerases
         user.binary_money -= self.price
         # It if bought from Master, so money increases
@@ -76,7 +76,8 @@ class Controller:
         master.save()
         user.save()
 
-    def userLeaves(self, user):
+    def userLeaves(self, userId):
+        user = User.Get(userId)
         user.leave()
 
         for u in User.objects.filter(sponsor=user):
@@ -118,16 +119,16 @@ class Controller:
         return self._getState().month
 
     def createNewUser(self, sponsor):
-        user = User.CreateNewUser(sponsor=sponsor)
-        id = user.id
-        self.createNewBinaryPosition(user)
-        self.createNewUnilevelPosition(user)
-        return User.objects.get(id=id)
+        userId = User.CreateNewUser(sponsor=sponsor).id
+        self.createNewBinaryPosition(userId)
+        self.createNewUnilevelPosition(userId)
+        return userId
 
     def calculateMonthlyCommission(self):
         return self.monthly_fee * self.monthly_percent / 100
 
-    def payMonthlyCommission(self, user):
+    def payMonthlyCommission(self, userId):
+        user = User.Get(userId)
         commission = self.calculateMonthlyCommission() * user.active_unilevel_position.countChildren(self.conf_unilevel_copmmission_depth)
         user.unilevel_money += commission
         user.save()
@@ -135,15 +136,17 @@ class Controller:
 
     def executeMonthlyPayments(self):
         master = MasterUser.Get()
+
         for user in User.objects.all():
             if not user.isMaster():
                 user.unilevel_money -= self.monthly_fee
-                master.unilevel_money += (self.monthly_fee - self.payMonthlyCommission(user))
+                user.save()
+                master.unilevel_money += (self.monthly_fee - self.payMonthlyCommission(user.id))
 
         master.save()
 
     def _createMoreNewUsersRecursive(self, queue, callNum, limit):
-        sponsor = queue.popleft()
+        sponsor = User.Get(queue.popleft())
         for i in range(2):
             queue.append(self.createNewUser(sponsor=sponsor))
             if (callNum + i + 1) == limit:
@@ -152,4 +155,4 @@ class Controller:
         self._createMoreNewUsersRecursive(queue, callNum + 2, limit)
 
     def createMoreNewUsers(self, limit):
-        self._createMoreNewUsersRecursive(deque([MasterUser.Get()]), 0, limit)
+        self._createMoreNewUsersRecursive(deque([MasterUser.Get().id]), 0, limit)
