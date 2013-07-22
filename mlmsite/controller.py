@@ -17,6 +17,7 @@ class Controller:
     monthly_percent = 10
     conf_binary_matrix_display_depth = 3
     conf_unilevel_copmmission_depth = 5
+    manyUserNumber = 1023
 
     def __init__(self):
         if not State.objects.all():
@@ -154,5 +155,5 @@ class Controller:
 
         self._createMoreNewUsersRecursive(queue, callNum + 2, limit)
 
-    def createMoreNewUsers(self, limit):
-        self._createMoreNewUsersRecursive(deque([MasterUser.Get().id]), 0, limit)
+    def createManyNewUsers(self):
+        self._createMoreNewUsersRecursive(deque([MasterUser.Get().id]), 0, self.manyUserNumber)

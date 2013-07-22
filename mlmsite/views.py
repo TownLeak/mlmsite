@@ -53,7 +53,7 @@ def graph_eval_more_users(request):
 
 
 def graph_eval_thousand_users(request):
-    Controller().createMoreNewUsers(1000)
+    Controller().createManyNewUsers()
     return HttpResponseRedirect('/graph_eval/')
 
 
