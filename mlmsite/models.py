@@ -50,6 +50,24 @@ class User(models.Model):
     unilevel_money = models.IntegerField(default=0)
     isActive = models.BooleanField(default=True)
 
+    # Login status of user
+    _isLoggedIn = models.BooleanField(default=False)
+
+    def isLoggedIn():
+        """The isLoggedIn property."""
+
+        def fget(self):
+            return self._isLoggedIn
+
+        def fset(self, value):
+            self._isLoggedIn = value
+            self.save()
+
+        def fdel(self):
+            del self._isLoggedIn
+        return locals()
+    isLoggedIn = property(**isLoggedIn())
+
     class MasterCannotLeave(Exception):
         pass
 

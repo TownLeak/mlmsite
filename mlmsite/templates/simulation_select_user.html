@@ -1,0 +1,14 @@
+<p>Válassz egy felhasználót. Innentől az ő szemével látod a rendszert.</p>
+<p>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ userSelectionForm.non_field_errors }}
+        {% for field in userSelectionForm %}
+        <p>
+            {{ field.errors }}
+            {{ field }}
+        </p>
+        {% endfor %}
+        <button type="submit" name="submit">OK</button>
+    </form>
+</p>

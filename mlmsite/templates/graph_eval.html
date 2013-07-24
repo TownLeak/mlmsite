@@ -44,7 +44,7 @@
                     <p>
                         <form action="" method="post">
                             {% csrf_token %}
-                            {{ form.non_field_errors }}
+                            {{ sponsorSelectionForm.non_field_errors }}
                             {% for field in sponsorSelectionForm %}
                             <p>
                                 {{ field.errors }}
@@ -55,20 +55,7 @@
                         </form>
                     </p>
                     <hr />
-                    <p>Válassz egy felhasználót. Innentől az ő szemével látod a rendszert.</p>
-                    <p>
-                        <form action="" method="post">
-                            {% csrf_token %}
-                            {{ form.non_field_errors }}
-                            {% for field in userSelectionForm %}
-                            <p>
-                                {{ field.errors }}
-                                {{ field }}
-                            </p>
-                            {% endfor %}
-                            <button type="submit" name="submit">OK</button>
-                        </form>
-                    </p>
+                    {% include "simulation_select_user.html" %}
                     <hr />
                     <p>
                         A következő link szimulálja azt, hogy eltelt egy hónap, és megint fizetés nap van: a fizető kliensek befizetnek, és osztjuk a jutalékokat.

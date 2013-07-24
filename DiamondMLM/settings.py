@@ -177,7 +177,7 @@ NEO4J_RESOURCE_URI = join(APP_ROOT, 'neo4jdb')
 # Template settings
 # ---------------------------------
 
-#TEMPLATE_STRING_IF_INVALID = "Undefined variable! %s"
+TEMPLATE_STRING_IF_INVALID = "Undefined variable! %s"
 
 # From Evernote TASK00001
 TEMPLATE_CONTEXT_PROCESSORS = (

@@ -26,9 +26,6 @@ class Controller:
     def _getState(self):
         return State.objects.get(id=1)
 
-    def getActualUser(self):
-        return self._getState().actual_user
-
     def getActualData(self):
         state = self._getState()
         logic = BinaryTree()
@@ -58,6 +55,9 @@ class Controller:
         state = self._getState()
         state.actual_user = user
         state.save()
+
+    def getActualUser(self):
+        return self._getState().actual_user
 
     def payBinaryCommission(self, userId):
         user = User.Get(userId)

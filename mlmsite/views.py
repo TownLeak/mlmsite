@@ -1,19 +1,56 @@
 #!/usr/bin/python
 # -*- coding: utf-8
-from userena import views as userena_views
+#from userena import views as userena_views
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.management import call_command
 from models import User, MasterUser
+from django.utils.translation import ugettext as _
+from controller import Controller
+from forms import GraphEval_UserSelectionForm, GraphEval_SponsorSelectionForm
 
 
 def index(request):
-    response = userena_views.signin(request, template_name='index.html')
-    return response
+    if request.method == 'POST':
+        userSelectionForm = GraphEval_UserSelectionForm(request.POST, prefix="user")
+
+        if userSelectionForm.is_valid():
+            userSelectionForm.save()
+            return HttpResponseRedirect('/')
+    else:
+        userSelectionForm = GraphEval_UserSelectionForm(prefix="user")
+
+    #response = userena_views.signin(request, template_name='index.html')
+    if Controller().getActualUser().isLoggedIn:
+        return render(request, "index_loggedin.html", {
+            "actual_user": Controller().getActualUser(),
+            "userSelectionForm": userSelectionForm})
+    else:
+        return render(request, "index_notloggedin.html", {
+            "actual_user": Controller().getActualUser(),
+            "userSelectionForm": userSelectionForm})
 
 
-from forms import GraphEval_UserSelectionForm, GraphEval_SponsorSelectionForm
-from controller import Controller
+def password_reset(request):
+    return HttpResponse(_(u"Reset Password"))
+
+
+def registration(request):
+    return HttpResponse(_(u"Registration"))
+
+
+def login(request):
+    Controller().getActualUser().isLoggedIn = True
+    return HttpResponseRedirect('/')
+
+
+def logout(request):
+    Controller().getActualUser().isLoggedIn = False
+    return HttpResponseRedirect('/')
+
+
+def bad_login(request):
+    return HttpResponse(_(u"Hibás belépés"))
 
 
 def graph_eval(request):
@@ -90,10 +127,11 @@ def graph_eval_next_month(request):
 def bootstrap(request):
     return render(request, "base_bootstrap_tutorial.html", {})
 
-from paypal.pro.views import PayPalPro
+#from paypal.pro.views import PayPalPro
 from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
+
 
 def try_paypal_cancel(request):
     return render(request, "try_paypal_cancel.html", {})
@@ -103,16 +141,10 @@ def try_paypal_success(request):
     return render(request, "try_paypal_success.html", {})
 
 
-import sys
-from django.db.models.signals import *
 from datetime import datetime
 
 
 def try_paypal(request):
-    for signal in [pre_save, pre_init, pre_delete, post_save, post_delete, post_init, post_syncdb]:
-    # print a List of connected listeners
-        print >>sys.stderr, signal.receivers
-    print >>sys.stderr, "%s%s" % (settings.SITE_NAME, "atyalapatyala")
     paypal_dict = {"business": settings.PAYPAL_RECEIVER_EMAIL,
         "amount": "1.00",             # amount to charge for item
         "invoice": datetime.now(),       # unique tracking variable paypal
