@@ -53,7 +53,7 @@ def bad_login(request):
 
 def graph_eval(request):
     if request.method == 'POST':
-        return handleUserManagementForms_post(request, 'graph_eval.html')
+        return ViewSupport.handleUserManagementForms_post(request, 'graph_eval.html')
 
     c = Controller()
 
@@ -64,7 +64,7 @@ def graph_eval(request):
         "tree_name": c.getActualTreeName(),
         "controller": c}
 
-    context.update(handleUserManagementForms_get(request))
+    context.update(ViewSupport.handleUserManagementForms_get(request))
     return render(request, "graph_eval.html", context)
 
 

@@ -35,11 +35,11 @@ sudo a2ensite $SITE_NAME
 sudo /etc/init.d/apache2 reload
 $EASY_INSTALL South
 $EASY_INSTALL django-countries
-$EASY_INSTALL django-userena
 $EASY_INSTALL django-bootstrap-toolkit
 $EASY_INSTALL django-mptt
 $EASY_INSTALL nose
 $EASY_INSTALL lettuce
+$EASY_INSTALL pip
 sudo apt-get build-dep python-imaging
 chmod 777 $SITE_ROOT # http://bit.ly/13e3jU4
 
