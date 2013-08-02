@@ -6,6 +6,7 @@ cd $ROOT
 git pull
 git submodule init
 git submodule update
+ln -sf django-userena/userena
 pushd DiamondMLM
 ln -sf settings_prod.py settings_actual.py
 popd

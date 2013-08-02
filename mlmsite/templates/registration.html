@@ -19,27 +19,13 @@
         <div class="container-fluid">
             <section class="row-fluid">
                 <header>
-                    <h1 class="span12">Belépés</h1>
+                    <h1 class="span12">Regisztráció</h1>
                 </header>
-                <div class="span12">
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        {{ login_form.non_field_errors }}
-                        {% for field in login_form %}
-                        <p>
-                            {{ field.errors }}
-                            {{ field }}
-                        </p>
-                        {% endfor %}
-                        <button type="submit" name="submit">OK</button>
-                    </form>
-                </div>
-
-                <div class="span12">
-                     <a href="{% url 'password_reset' %}" title="{% trans 'Elfelejtettem a jelszavamat' %}">{% trans "Elfelejtettem a jelszavamat" %}</a>
-                </div>
+            <div class="span12">
+                {% include "dev/create_user.html" %}
+            </div>
             </section>
-        </div>    
+        </div>
         <script src="{% static "js/jquery.js" %}" type="text/javascript"></script>     
     </body>
 </html>

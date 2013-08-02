@@ -1,42 +1,40 @@
 #!/usr/bin/python
 # -*- coding: utf-8
-#from userena import views as userena_views
+from userena import views as userena_views
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.management import call_command
 from models import User, MasterUser
 from django.utils.translation import ugettext as _
 from controller import Controller
-from forms import GraphEval_UserSelectionForm, GraphEval_SponsorSelectionForm
+from django.conf import settings
+
+if settings.DEVELOPMENT_MODE:
+    from mlmsite.dev.view_support import ViewSupport
+else:
+    from mlmsite.view_support import ViewSupport
 
 
 def index(request):
     if request.method == 'POST':
-        userSelectionForm = GraphEval_UserSelectionForm(request.POST, prefix="user")
+        if "submit_login" in request.POST:
+            return userena_views.signin(request)
+        else:
+            return ViewSupport.handleUserManagementForms_post(request, "/")
 
-        if userSelectionForm.is_valid():
-            userSelectionForm.save()
-            return HttpResponseRedirect('/')
-    else:
-        userSelectionForm = GraphEval_UserSelectionForm(prefix="user")
-
-    #response = userena_views.signin(request, template_name='index.html')
-    if Controller().getActualUser().isLoggedIn:
-        return render(request, "index_loggedin.html", {
-            "actual_user": Controller().getActualUser(),
-            "userSelectionForm": userSelectionForm})
-    else:
-        return render(request, "index_notloggedin.html", {
-            "actual_user": Controller().getActualUser(),
-            "userSelectionForm": userSelectionForm})
+    template = "index_loggedin.html" if Controller().getActualUser().isLoggedIn else "index_notloggedin.html"
+    extra_context = ViewSupport.handleUserManagementForms_get(request)
+    return userena_views.signin(request, template_name=template, extra_context=extra_context)
 
 
 def password_reset(request):
-    return HttpResponse(_(u"Reset Password"))
+    return render(request, "password_reset.html", {})
 
 
 def registration(request):
-    return HttpResponse(_(u"Registration"))
+    if request.method == 'POST':
+        return ViewSupport.handleUserManagementForms_post(request, '/')
+    return render(request, "registration.html", ViewSupport.handleUserManagementForms_get(request))
 
 
 def login(request):
@@ -50,35 +48,24 @@ def logout(request):
 
 
 def bad_login(request):
-    return HttpResponse(_(u"Hibás belépés"))
+    return HttpResponse(_(u"Bad login"))
 
 
 def graph_eval(request):
     if request.method == 'POST':
-        userSelectionForm = GraphEval_UserSelectionForm(request.POST, prefix="user")
-        sponsorSelectionForm = GraphEval_SponsorSelectionForm(request.POST, prefix="sponsor")
-
-        if userSelectionForm.is_valid():
-            userSelectionForm.save()
-            return HttpResponseRedirect('/graph_eval/')
-
-        if sponsorSelectionForm.is_valid():
-            sponsorSelectionForm.save()
-            return HttpResponseRedirect('/graph_eval/')
-    else:
-        userSelectionForm = GraphEval_UserSelectionForm(prefix="user")
-        sponsorSelectionForm = GraphEval_SponsorSelectionForm(prefix="sponsor")
+        return handleUserManagementForms_post(request, 'graph_eval.html')
 
     c = Controller()
 
-    return render(request, "graph_eval.html", {
+    context = {
         "actual_user": c.getActualUser(),
-        "userSelectionForm": userSelectionForm,
-        "sponsorSelectionForm": sponsorSelectionForm,
         "tree_data": c.getActualTree(),
         "actual_month": c.getActualMonth(),
         "tree_name": c.getActualTreeName(),
-        "controller": c})
+        "controller": c}
+
+    context.update(handleUserManagementForms_get(request))
+    return render(request, "graph_eval.html", context)
 
 
 def graph_eval_more_users(request):
@@ -86,42 +73,42 @@ def graph_eval_more_users(request):
         user = User.CreateNewUser(sponsor=MasterUser.Get())
         Controller().createNewBinaryPosition(user)
         Controller().createNewUnilevelPosition(user)
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('/dev/graph_eval/')
 
 
 def graph_eval_thousand_users(request):
     Controller().createManyNewUsers()
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('/dev/graph_eval/')
 
 
 def graph_eval_gyalu(request):
     call_command('flush', interactive=False, verbosity=1)
     call_command('syncdb', interactive=False, verbosity=1)
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('//dev/graph_eval/')
 
 
 def graph_eval_leave(request, userid):
     c = Controller()
     c.userLeaves(User.objects.get(id=userid))
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('/dev/graph_eval/')
 
 
 def graph_eval_binary_matrix(request):
     c = Controller()
     c.switchToBinaryMatrix()
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('/dev/graph_eval/')
 
 
 def graph_eval_unilevel_matrix(request):
     c = Controller()
     c.switchToUnilevelMatrix()
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('/dev/graph_eval/')
 
 
 def graph_eval_next_month(request):
     c = Controller()
     c.advanceToNextMonth()
-    return HttpResponseRedirect('/graph_eval/')
+    return HttpResponseRedirect('/dev/graph_eval/')
 
 
 def bootstrap(request):
@@ -145,7 +132,8 @@ from datetime import datetime
 
 
 def try_paypal(request):
-    paypal_dict = {"business": settings.PAYPAL_RECEIVER_EMAIL,
+    paypal_dict = {
+        "business": settings.PAYPAL_RECEIVER_EMAIL,
         "amount": "1.00",             # amount to charge for item
         "invoice": datetime.now(),       # unique tracking variable paypal
         "item_name": "Cipő",

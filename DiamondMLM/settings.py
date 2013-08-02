@@ -11,6 +11,7 @@ SITE_NAME = Settings["site_name"]
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+DEVELOPMENT_MODE = True
 
 ADMINS = (
     ('Zsolt Molnar', 'zsolt@zsoltmolnar.hu'),

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-04-29 22:48+0200\n"
+"POT-Creation-Date: 2013-08-02 13:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,53 +29,106 @@ msgstr ""
 msgid "Bizonyosodjon meg arról, hogy ez az érték legfeljebb"
 msgstr ""
 
-#: templates/header.html:14
-msgid "Diamond MLM Site Logo"
+#: views.py:50
+msgid "Bad login"
+msgstr "Hibás belépés"
+
+#: templates/index_loggedin.html:22
+msgid "Belépve"
 msgstr ""
 
-#: templates/index.html:5 templates/login.html:25
+#: templates/index_loggedin.html:30
+msgid "Egyszeri díj befizetése"
+msgstr ""
+
+#: templates/index_loggedin.html:31
+msgid "Havi díj befizetése"
+msgstr ""
+
+#: templates/index_loggedin.html:32
+msgid "Tranzakcióim története"
+msgstr ""
+
+#: templates/index_loggedin.html:33
+msgid "Aktuális pozícióm"
+msgstr ""
+
+#: templates/index_loggedin.html:34
+msgid "Pénzügyi egyenleg"
+msgstr ""
+
+#: templates/index_loggedin.html:35
+msgid "Adataim módosítása"
+msgstr ""
+
+#: templates/index_loggedin.html:36
+msgid "Kilépés"
+msgstr ""
+
+#: templates/index_notloggedin.html:7 templates/index_notloggedin.html:32
 msgid "Login"
 msgstr "Bejelentkezés"
+
+#: templates/index_notloggedin.html:15
+msgid "Sign in to"
+msgstr "Bejelentkezés a"
+
+#: templates/index_notloggedin.html:15
+msgid "El Bundy Cipőbolt"
+msgstr ""
+
+#: templates/index_notloggedin.html:15
+msgid "-be"
+msgstr "-be"
+
+#: templates/index_notloggedin.html:33
+msgid "Forgot your password?"
+msgstr ""
+
+#: templates/index_notloggedin.html:36
+msgid "Don't have an account yet?"
+msgstr "Még nincs fiókja?"
+
+#: templates/index_notloggedin.html:36
+msgid "Register"
+msgstr "Regisztrál"
+
+#: templates/index_notloggedin.html:63
+msgid "Belépek"
+msgstr ""
+
+#: templates/index_notloggedin.html:63
+msgid "Jelszó nélküli belépés"
+msgstr ""
+
+#: templates/index_notloggedin.html:64
+msgid "Belépek rosszul"
+msgstr ""
+
+#: templates/index_notloggedin.html:65
+msgid "Elfelejtettem a jelszavamat"
+msgstr ""
+
+#: templates/index_notloggedin.html:66
+#, fuzzy
+msgid "Regisztrálok"
+msgstr "Regisztrál"
 
 #: templates/language_selector.html:16
 msgid "Go"
 msgstr "Mehet"
 
-#: templates/login.html:10
-msgid "Sign in to"
-msgstr "Bejelentkezés a"
+#~ msgid "Username"
+#~ msgstr "Felhasználó név"
 
-#: templates/login.html:10
-msgid "Diamond MLM"
-msgstr ""
+#~ msgid "Password"
+#~ msgstr "Jelszó"
 
-#: templates/login.html:10
-msgid "-be"
-msgstr "-be"
+#~ msgid " Remember me"
+#~ msgstr "Emlékezz rám"
 
-#: templates/login.html:13
-msgid "Username"
-msgstr "Felhasználó név"
-
-#: templates/login.html:16
-msgid "Password"
-msgstr "Jelszó"
-
-#: templates/login.html:22
-msgid " Remember me"
-msgstr "Emlékezz rám"
-
-#: templates/login.html:34
-msgid "Don't have an account yet?"
-msgstr "Még nincs fiókja?"
-
-#: templates/login.html:34
-msgid "Register"
-msgstr "Regisztrál"
-
-#: templates/registration.html:5
-msgid "Registration"
-msgstr "Regisztráció"
+#~ msgid "Registration"
+#~ msgstr "Regisztráció"
 
 #~ msgid "Email address"
 #~ msgstr "Email cím"

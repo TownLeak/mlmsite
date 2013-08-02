@@ -3,7 +3,7 @@
 <div class="white form-horizontal">
     <form action="/i18n/setlang/" method="post">
         {% csrf_token %}
-        <input name="next" type="hidden" value="{{ redirect_to }}" /> 
+        <input name="next" type="hidden" value="" /> 
         <select class="well input-medium" name="language">
             {{ LANGUAGES }}
             {% get_language_info_list for LANGUAGES as languages %}
@@ -13,6 +13,6 @@
                 </option>
              {% endfor %}
         </select> 
-        <button class="btn btn-black" type="submit">{% trans "Go" %}</button>
+        <button class="btn btn-success" type="submit">{% trans "Go" %}</button>
     </form>
 </div>

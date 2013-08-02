@@ -1,0 +1,14 @@
+<p>Új felhasználó regisztrálása. Nem kell kitölteni adatokat, csinál neked egy új kamu "felhasználót" azonnal. Válassz szponzort, OK-ra csinálja a felhasználót. Ez leszimulál egy sikeres vásárlást is, tehát az új felhasználó befizetett, stb. A játék kedvéért, a kliens befizet a havidíjas cucckerájra is, szóval megjelenik minden mátrixban.</p>
+<p>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ sponsorSelectionForm.non_field_errors }}
+        {% for field in sponsorSelectionForm %}
+        <p>
+            {{ field.errors }}
+            {{ field }}
+        </p>
+        {% endfor %}
+        <button type="submit" name="submit">OK</button>
+    </form>
+</p>

@@ -16,7 +16,7 @@ class Controller:
     commission = 2 * price
     monthly_percent = 10
     conf_binary_matrix_display_depth = 3
-    conf_unilevel_copmmission_depth = 5
+    conf_unilevel_commission_depth = 5
     manyUserNumber = 1023
 
     def __init__(self):
@@ -108,7 +108,7 @@ class Controller:
         self._switchToMatrix(State.UNILEVEL_TREE)
 
     def getActualTreeName(self):
-        return _(u"Binary matrix") if self._getState().tree_view == State.BINARY_TREE else "Unilevel matrix"
+        return "Binary matrix" if self._getState().tree_view == State.BINARY_TREE else "Unilevel matrix"
 
     def advanceToNextMonth(self):
         state = self._getState()
@@ -130,7 +130,7 @@ class Controller:
 
     def payMonthlyCommission(self, userId):
         user = User.Get(userId)
-        commission = self.calculateMonthlyCommission() * user.active_unilevel_position.countChildren(self.conf_unilevel_copmmission_depth)
+        commission = self.calculateMonthlyCommission() * user.active_unilevel_position.countChildren(self.conf_unilevel_commission_depth)
         user.unilevel_money += commission
         user.save()
         return commission

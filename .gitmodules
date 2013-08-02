@@ -1,3 +1,7 @@
 [submodule "paypal"]
 	path = paypal
 	url = https://github.com/rossz/django-paypal.git
+
+[submodule "django-userena"]
+    path = django-userena
+    url = https://github.com/rossz/django-userena.git
