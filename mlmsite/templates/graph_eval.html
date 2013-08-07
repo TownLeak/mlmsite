@@ -47,7 +47,7 @@
                     <p>
                         A következő link szimulálja azt, hogy eltelt egy hónap, és megint fizetés nap van: a fizető kliensek befizetnek, és osztjuk a jutalékokat.
                         <br>
-                        <a href="/graph_eval/next_month/">Következő hónap</a>
+                        <a href="/dev/graph_eval/next_month/">Következő hónap</a>
                     </p>
                     <p>Aktuális hónap: <b>{{actual_month}}</b></p>
                     <hr />
@@ -55,7 +55,7 @@
                     <p>Te most ez a csávó vagy: <b>{{ actual_user.username }}</b></p>
                     <p>Szponzorom: <b>{{ actual_user.sponsor.username }}</b></p>
                     <p>
-                        <b>Mátrixok: </b><a href="/graph_eval/binary_matrix/">bináris</a> | <a href="/graph_eval/unilevel_matrix/">unilevel</a>
+                        <b>Mátrixok: </b><a href="/dev/graph_eval/binary_matrix/">bináris</a> | <a href="/dev/graph_eval/unilevel_matrix/">unilevel</a>
                     </p>
                     <p>
                         Pozícióim:<br />
@@ -79,12 +79,12 @@
                     {% endif %}
                     <div class="row-fluid">
                         <div class="span3">
-                            <p><a href="/graph_eval/gyalu/">GYALU</a>. Klikkelj erre, és reszeltek az adatbázisnak, kezded a nulláról.</p>
-                            <p><a href="/graph_eval/more_users/">Csinálj 6 usert azonnal a mester alá</a></p>
-                            <p><a href="/graph_eval/thousand_users/">Csinálj {{ controller.manyUserNumber }} usert azonnal.</a> Mindenki behoz 2 fickót, ez olyan. A Mesternél kezdi.</p>
+                            <p><a href="/dev/graph_eval/gyalu/">GYALU</a>. Klikkelj erre, és reszeltek az adatbázisnak, kezded a nulláról.</p>
+                            <p><a href="/dev/graph_eval/more_users/">Csinálj 6 usert azonnal a mester alá</a></p>
+                            <p><a href="/dev/graph_eval/thousand_users/">Csinálj {{ controller.manyUserNumber }} usert azonnal.</a> Mindenki behoz 2 fickót, ez olyan. A Mesternél kezdi.</p>
                         </div>
                         <div class="span3">
-                            <p><a href="/graph_eval/leave/{{ actual_user.id }}">Lelépek.</a> Ekkor minden szponzoráltamnak a Mester lesz a szponzora.</p>
+                            <p><a href="/dev/graph_eval/leave/{{ actual_user.id }}">Lelépek.</a> Ekkor minden szponzoráltamnak a Mester lesz a szponzora.</p>
                         </div>
                     </div>
                 </div>
